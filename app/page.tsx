@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { QrCodeIcon } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { Html5QrcodeScanner } from "html5-qrcode";
+import { Html5QrcodeScanner, Html5QrcodeResult } from "html5-qrcode";
+
 export default function Home() {
   const [result, setResult] = useState("No result");
   const qrCodeScannerRef = useRef(null);
@@ -19,15 +20,15 @@ export default function Home() {
       setShowLoading(false);
     }, 2000);
   };
-  const onScanSuccess = (decodedText, decodedResult) => {
+  const onScanSuccess = (decodedText: string, result: Html5QrcodeResult) => {
     if (decodedText === "1234") {
       toggleScanner();
     } else {
-      setResult(decodedText);
+      setResult(decodedText.toString());
     }
   };
 
-  const onScanError = (errorMessage) => {
+  const onScanError = (errorMessage: String) => {
     console.error(errorMessage);
   };
 
