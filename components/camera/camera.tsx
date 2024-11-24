@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeftRight, Check, GalleryVerticalEnd, Timer, X, Images } from "lucide-react";
+import { ArrowLeftRight, Printer, X, Images, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CameraView } from "./camera-view";
 import { FC, useRef, useState } from "react";
@@ -23,6 +23,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Layout1, Layout2, Layout3 } from "./photo-layouts";
+import React from "react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 
 interface CameraProps {
   onClosed: () => void;
@@ -31,12 +34,15 @@ interface CameraProps {
 
 const Camera: FC<CameraProps> = ({ onClosed, onCapturedImages }) => {
   const camera = useRef<CameraType>();
+  const videoRef = useRef<HTMLVideoElement>(null);
   const { images, addImage, numberOfCameras, resetImages, stopStream } = useCamera();
   const [timerActive, setTimerActive] = useState(false);
   const [timerDuration, setTimerDuration] = useState(4);
   const [timerCount, setTimerCount] = useState(0);
   const [showFlash, setShowFlash] = useState(false);
   const [showGrid, setShowGrid] = useState(false);
+  const [selectedLayout, setSelectedLayout] = useState<number | null>(null);
+  const [finalImage, setFinalImage] = useState<string | null>(null);
 
   const handleCapture = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
@@ -85,9 +91,27 @@ const Camera: FC<CameraProps> = ({ onClosed, onCapturedImages }) => {
     handleOnClosed();
   };
 
+  const handleLayoutSave = (dataUrl: string) => {
+    setFinalImage(dataUrl);
+  };
+
+  const handleDownload = () => {
+    if (finalImage) {
+      const link = document.createElement('a');
+      link.href = finalImage;
+      link.download = 'photo-booth-layout.jpg';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
+
   return (
     <div className="z-10 flex min-h-screen w-full flex-col bg-black">
       <div className="relative flex-1">
+        <div className="z-99">
+
+        </div>
         <div className="absolute z-10 w-full h-16 flex justify-between items-center px-4 ">
           <Button
             className="rounded-full p-2 bg-gray-800 text-white hover:bg-gray-700"
@@ -97,14 +121,6 @@ const Camera: FC<CameraProps> = ({ onClosed, onCapturedImages }) => {
             <X className="h-6 w-6" />
           </Button>
 
-          {images.length > 0 && (
-            <Button
-              className="px-10 py-2 bg-green-500 hover:bg-green-600 text-white rounded-full shadow-lg"
-              onClick={() => handleOnCapturedImages(images)}
-            >
-              Done ({images.length})
-            </Button>
-          )}
 
           <div className="flex space-x-2">
             <Select
@@ -161,7 +177,8 @@ const Camera: FC<CameraProps> = ({ onClosed, onCapturedImages }) => {
 
 
 
-        <div className="absolute bottom-1 left-0 right-0 flex justify-center items-center space-x-10 bg-gray-600 bg-opacity-30 py-14">
+
+        <div className="absolute bottom-1 left-0 right-0 flex justify-center items-center space-x-20 md:space-x-10 bg-gray-600 bg-opacity-30 py-14">
           <Gallery />
           <Button
             className="h-16 w-16 rounded-full bg-white hover:bg-gray-300 p-2 shadow-lg"
@@ -170,9 +187,36 @@ const Camera: FC<CameraProps> = ({ onClosed, onCapturedImages }) => {
             <div className="h-14 w-14 rounded-full bg-red-500 hover:bg-red-600" />
           </Button>
           {numberOfCameras > 0 && <SwitchCamera />}
-
         </div>
 
+        <div className="absolute bottom-48 right-4">
+          <LayoutSelector selectedLayout={selectedLayout} setSelectedLayout={setSelectedLayout} />
+        </div>
+
+        {selectedLayout !== null && images.length >= 3 && (
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button className="absolute rounded-full bottom-48 right-20 z-10 bg-green-500 hover:bg-green-600 text-white">
+                Create Templates
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="w-full ">
+              <DialogHeader>
+                <DialogTitle>Photo Booth Layout</DialogTitle>
+              </DialogHeader>
+              <ScrollArea className="h-full">
+                {selectedLayout === 1 && <Layout1 images={images.slice(0, 3)} onSave={handleLayoutSave} />}
+                {selectedLayout === 2 && <Layout2 images={images.slice(0, 3)} onSave={handleLayoutSave} />}
+                {selectedLayout === 3 && <Layout3 images={images.slice(0, 3)} onSave={handleLayoutSave} />}
+              </ScrollArea>
+              {finalImage && (
+                <Button onClick={handleDownload} className="mt-4">
+                  <Download className="mr-2 h-4 w-4" /> Download
+                </Button>
+              )}
+            </DialogContent>
+          </Dialog>
+        )}
 
 
         {timerCount > 0 && (
@@ -189,6 +233,92 @@ const Camera: FC<CameraProps> = ({ onClosed, onCapturedImages }) => {
   );
 };
 
+interface LayoutSelectorProps {
+  selectedLayout: number | null;
+  setSelectedLayout: (layout: number) => void;
+}
+
+const LayoutSelector: React.FC<LayoutSelectorProps> = ({ selectedLayout, setSelectedLayout }) => {
+  const [isOpen, setIsOpen] = React.useState(false);
+
+  const handleLayoutSelect = (layout: number) => {
+    setSelectedLayout(layout);
+    setIsOpen(false);
+  };
+
+  const layouts = [
+    {
+      id: 1,
+      name: 'Classic Vertical',
+      skeleton: (
+        <div className="w-full h-40 bg-gray-200 flex flex-col">
+          <div className="h-1/3 border-b-2 border-white"></div>
+          <div className="h-1/3 border-b-2 border-white"></div>
+          <div className="h-1/3"></div>
+        </div>
+      ),
+    },
+    {
+      id: 2,
+      name: 'Modern Grid',
+      skeleton: (
+        <div className="w-full h-40 bg-gray-200 grid grid-cols-2 grid-rows-2 gap-1">
+          <div className="bg-white"></div>
+          <div className="bg-white"></div>
+          <div className="bg-white"></div>
+          <div className="bg-white"></div>
+        </div>
+      ),
+    },
+    {
+      id: 3,
+      name: 'Polaroid Style',
+      skeleton: (
+        <div className="w-full h-40 bg-gray-200 flex justify-center items-center">
+          <div className="w-3/4 h-3/4 bg-white border-8 border-gray-300 transform rotate-6"></div>
+        </div>
+      ),
+    },
+  ];
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="outline" onClick={() => setIsOpen(true)}>
+              <Printer className="h-10 w-10" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Select templates</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Select a Template</DialogTitle>
+        </DialogHeader>
+        <div className="grid grid-cols-1 gap-4">
+          {layouts.map((layout) => (
+            <Button
+              key={layout.id}
+              variant="outline"
+              className={`h-auto p-4 ${selectedLayout === layout.id ? 'ring-2 ring-blue-500' : ''}`}
+              onClick={() => handleLayoutSelect(layout.id)}
+            >
+              <div className="w-full space-y-2">
+                <div className="font-semibold">{layout.name}</div>
+                {layout.skeleton}
+              </div>
+            </Button>
+          ))}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 
 
 function SwitchCamera() {
@@ -199,7 +329,7 @@ function SwitchCamera() {
       <Button
         variant="default"
         size="icon"
-        className="rounded-full p-4 bg-gray-800 text-white hover:bg-gray-700"
+        className="w-16 h-10 bg-gray-800 text-white hover:bg-gray-700"
         onClick={switchCamera}
       >
         <ArrowLeftRight className="fixed h-6 w-6" />
@@ -212,7 +342,7 @@ function SwitchCamera() {
         <Button
           variant={"default"}
           size={"icon"}
-          className=" rounded-full   p-4 bg-gray-800 text-white hover:bg-gray-700"
+          className=" w-16 h-10  bg-gray-800 text-white hover:bg-gray-700"
         >
           <ArrowLeftRight className="fixed h-6 w-6  " />
         </Button>
@@ -251,10 +381,15 @@ export function Gallery() {
     <Dialog>
       <DialogTrigger asChild>
         <Button
-          className="rounded-full p-2 bg-gray-800 text-white hover:bg-gray-700"
+          className="flex items-center justify-center  w-16 h-10 p-2 bg-gray-800 text-white hover:bg-gray-700 transition duration-200"
           size="icon"
         >
-          <GalleryVerticalEnd className="h-6 w-6" />
+          <Images className="h-6 w-6" />
+          {images.length > 0 && (
+            <span className="ml-0 text-sm">
+              ({images.length})
+            </span>
+          )}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[90vw] sm:max-h-[90vh]">
