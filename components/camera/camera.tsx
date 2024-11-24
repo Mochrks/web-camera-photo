@@ -1,9 +1,9 @@
 "use client";
 
-import { ArrowLeftRight, Check, GalleryVerticalEnd, X } from "lucide-react";
+import { ArrowLeftRight, Check, GalleryVerticalEnd, Timer, X, Images } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CameraView } from "./camera-view";
-import { FC, useRef } from "react";
+import { FC, useRef, useState } from "react";
 import { CameraType } from "@/components/camera/camera-types";
 import { useCamera } from "@/components/camera/camera-provider";
 import { cn } from "@/lib/utils";
@@ -31,16 +31,46 @@ interface CameraProps {
 
 const Camera: FC<CameraProps> = ({ onClosed, onCapturedImages }) => {
   const camera = useRef<CameraType>();
-  const { images, addImage, numberOfCameras, resetImages, stopStream } =
-    useCamera();
+  const { images, addImage, numberOfCameras, resetImages, stopStream } = useCamera();
+  const [timerActive, setTimerActive] = useState(false);
+  const [timerDuration, setTimerDuration] = useState(4);
+  const [timerCount, setTimerCount] = useState(0);
+  const [showFlash, setShowFlash] = useState(false);
+  const [showGrid, setShowGrid] = useState(false);
 
   const handleCapture = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
+    if (timerActive) {
+      startTimer();
+    } else {
+      capturePhoto();
+    }
+  };
+
+  const startTimer = () => {
+    setTimerCount(timerDuration);
+    const timer = setInterval(() => {
+      setTimerCount((prevCount) => {
+        if (prevCount === 1) {
+          clearInterval(timer);
+          capturePhoto();
+          return 0;
+        }
+        return prevCount - 1;
+      });
+    }, 1000);
+  };
+
+  const capturePhoto = () => {
     if (camera.current) {
-      const imageData = camera.current.takePhoto();
-      if (imageData) {
-        addImage(imageData);
-      }
+      setShowFlash(true);
+      setTimeout(() => {
+        const imageData = camera.current?.takePhoto();
+        if (imageData) {
+          addImage(imageData);
+        }
+        setShowFlash(false);
+      }, 150);
     }
   };
 
@@ -48,84 +78,118 @@ const Camera: FC<CameraProps> = ({ onClosed, onCapturedImages }) => {
     stopStream();
     onClosed();
   };
+
   const handleOnCapturedImages = (images: string[]) => {
     onCapturedImages(images);
     resetImages();
     handleOnClosed();
   };
+
   return (
-    <div className="z-10 flex min-w-[calc(100vw_-_theme(spacing.4))] flex-1 flex-col ">
-      <div className="relative w-full ">
-        <div className="absolute z-10 w-full md:h-[calc(93vh_-_theme(spacing.12))] md:w-[20%] ">
-          <div className="relative left-3 top-3">
+    <div className="z-10 flex min-h-screen w-full flex-col bg-black">
+      <div className="relative flex-1">
+        <div className="absolute z-10 w-full h-16 flex justify-between items-center px-4 ">
+          <Button
+            className="rounded-full p-2 bg-gray-800 text-white hover:bg-gray-700"
+            size="icon"
+            onClick={handleOnClosed}
+          >
+            <X className="h-6 w-6" />
+          </Button>
+
+          {images.length > 0 && (
             <Button
-              className=" rounded-full p-4 opacity-90 hover:opacity-100  "
-              size={"icon"}
-              variant={images.length > 0 ? "destructive" : "default"}
-              onClick={handleOnClosed}
+              className="px-10 py-2 bg-green-500 hover:bg-green-600 text-white rounded-full shadow-lg"
+              onClick={() => handleOnCapturedImages(images)}
             >
-              <X className="fixed h-6 w-6  " />
+              Done ({images.length})
             </Button>
-          </div>
+          )}
 
-        </div>
-        {images.length > 0 && (
-
-          <div className="absolute right-6  z-10  md:left-4 md:bottom-1 ">
-            <Button
-              className="w-48 bg-green-500 hover:bg-green-600 text-white"
-              size={"icon"}
-              variant={"secondary"}
-              onClick={() => {
-                handleOnCapturedImages(images);
+          <div className="flex space-x-2">
+            <Select
+              value={timerActive ? timerDuration.toString() : "off"}
+              onValueChange={(value) => {
+                if (value === "off") {
+                  setTimerActive(false);
+                } else {
+                  setTimerActive(true);
+                  setTimerDuration(parseInt(value));
+                }
               }}
             >
-              <h3 className=" scroll-m-20 text-2xl font-semibold tracking-tight">
-                Done
-              </h3>
+              <SelectTrigger className="w-[100px] bg-gray-800 text-white">
+                <SelectValue placeholder="Timer" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="off">Timer</SelectItem>
+                <SelectItem value="4">4s</SelectItem>
+                <SelectItem value="5">5s</SelectItem>
+                <SelectItem value="10">10s</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button
+              className={cn(
+                "rounded-full p-2",
+                showGrid ? "bg-blue-500 text-white" : "bg-gray-800 text-white hover:bg-gray-700"
+              )}
+              size="icon"
+              onClick={() => setShowGrid(!showGrid)}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="3" y1="9" x2="21" y2="9"></line>
+                <line x1="3" y1="15" x2="21" y2="15"></line>
+                <line x1="9" y1="3" x2="9" y2="21"></line>
+                <line x1="15" y1="3" x2="15" y2="21"></line>
+              </svg>
             </Button>
           </div>
-        )}
+        </div>
+
         <CameraView ref={camera} />
-        <div className="absolute bottom-0 left-[45%] z-20 md:bottom-auto md:left-auto md:right-14 md:top-[50%] ">
+
+        {showGrid && (
+          <div className="absolute inset-0 pointer-events-none">
+            <div className="w-full h-full grid grid-cols-3 grid-rows-3">
+              {[...Array(9)].map((_, i) => (
+                <div key={i} className="border border-white opacity-30"></div>
+              ))}
+            </div>
+          </div>
+        )}
+
+
+
+        <div className="absolute bottom-1 left-0 right-0 flex justify-center items-center space-x-10 bg-gray-600 bg-opacity-30 py-14">
+          <Gallery />
           <Button
-            className={cn(
-              "group h-12 w-12  rounded-full p-8 opacity-40 hover:opacity-100  ",
-            )}
-            size={"icon"}
-            variant={"default"}
-            onClick={(e) => {
-              handleCapture(e);
-            }}
+            className="h-16 w-16 rounded-full bg-white hover:bg-gray-300 p-2 shadow-lg"
+            onClick={handleCapture}
           >
-            <div className="fixed h-11 w-11 rounded-full bg-primary-foreground group-hover:bg-primary-foreground/60"></div>
+            <div className="h-14 w-14 rounded-full bg-red-500 hover:bg-red-600" />
           </Button>
+          {numberOfCameras > 0 && <SwitchCamera />}
+
         </div>
 
-        <div
-          className={cn(
-            "absolute z-10 w-full md:right-0 md:top-0  md:h-[calc(93vh_-_theme(spacing.12))] md:w-[20%]",
-          )}
-        >
-          {images.length > 0 && (
-            <div className="absolute w-48 flex gap-5 p-2 items-center justify-center md:bottom-auto md:left-auto md:right-14 md:top-4 bg-orange-400">
-              <h3 className=" scroll-m-20 text-2xl font-semibold tracking-tight">
-                {images.length} Photos
-              </h3>
-              <Gallery />
-            </div>
-          )}
 
-          {numberOfCameras > 0 && (
-            <div className="absolute bottom-0 right-6 z-10 md:bottom-0  md:right-14  md:top-auto">
-              <SwitchCamera />
-            </div>
-          )}
-        </div>
+
+        {timerCount > 0 && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
+            <span className="text-9xl text-white font-bold">{timerCount}</span>
+          </div>
+        )}
+
+        {showFlash && (
+          <div className="absolute inset-0 bg-white animate-flash"></div>
+        )}
       </div>
     </div>
   );
 };
+
+
 
 function SwitchCamera() {
   const { devices, setActiveDeviceId, activeDeviceId, switchCamera } = useCamera();
@@ -135,7 +199,7 @@ function SwitchCamera() {
       <Button
         variant="default"
         size="icon"
-        className="rounded-full p-4 opacity-40 hover:opacity-100"
+        className="rounded-full p-4 bg-gray-800 text-white hover:bg-gray-700"
         onClick={switchCamera}
       >
         <ArrowLeftRight className="fixed h-6 w-6" />
@@ -148,7 +212,7 @@ function SwitchCamera() {
         <Button
           variant={"default"}
           size={"icon"}
-          className=" rounded-full   p-4 opacity-40 hover:opacity-100 "
+          className=" rounded-full   p-4 bg-gray-800 text-white hover:bg-gray-700"
         >
           <ArrowLeftRight className="fixed h-6 w-6  " />
         </Button>
@@ -180,37 +244,34 @@ function SwitchCamera() {
   );
 }
 
-function Gallery() {
+export function Gallery() {
   const { images, removeImage } = useCamera();
+
   return (
     <Dialog>
       <DialogTrigger asChild>
         <Button
-          className="rounded-full  p-4 opacity-70 hover:opacity-100 bg-white hover:bg-slate-200 text-black "
-          size={"icon"}
-          variant={"default"}
+          className="rounded-full p-2 bg-gray-800 text-white hover:bg-gray-700"
+          size="icon"
         >
-          <GalleryVerticalEnd className="fixed h-6 w-6  " />
+          <GalleryVerticalEnd className="h-6 w-6" />
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="sm:max-w-[90vw] sm:max-h-[90vh]">
         <DialogHeader>
           <DialogTitle>{images.length} Photos</DialogTitle>
         </DialogHeader>
-        <ScrollArea className="h-[calc(80vh-_theme(spacing.16))]">
-          <div className="grid grid-cols-2 gap-2  ">
+        <ScrollArea className="h-[70vh]">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 p-4">
             {images.map((image, index) => (
-              <div key={index} className="relative ">
-                <img src={image} alt="captured" />
+              <div key={index} className="relative aspect-square">
+                <img src={image} alt={`captured ${index + 1}`} className="w-full h-full object-cover rounded-lg" />
                 <Button
-                  className="absolute right-2 top-2 h-6 w-6 rounded-full  p-2 opacity-40 hover:opacity-100  "
-                  size={"icon"}
-                  variant={"destructive"}
-                  onClick={() => {
-                    removeImage(index);
-                  }}
+                  className="absolute right-2 top-2 h-8 w-8 rounded-full bg-red-500 hover:bg-red-600 p-1"
+                  size="icon"
+                  onClick={() => removeImage(index)}
                 >
-                  <X className="fixed h-4 w-4  " />
+                  <X className="h-4 w-4 text-white" />
                 </Button>
               </div>
             ))}
@@ -220,5 +281,6 @@ function Gallery() {
     </Dialog>
   );
 }
+
 
 export default Camera;

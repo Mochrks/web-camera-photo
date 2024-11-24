@@ -17,11 +17,11 @@ export default function Capture() {
                 onOpenChange={(open) => setShowDialog(open)}
             >
                 <DialogTrigger asChild>
-                    <Button variant="outline">
-                        <CameraIcon className="mr-2 h-5 w-5" />
+                    <div className='flex items-center p-10 border rounded-2xl cursor-pointer text-white text-xl bg-green-500 hover:bg-green-700'  >
+                        <CameraIcon className="mr-2 h-10 w-10" />
                         Capture Photo
                         <span className="sr-only">Capture</span>
-                    </Button>
+                    </div>
                 </DialogTrigger>
                 <DialogContent className="h-svh w-svw max-w-full p-0">
                     <Camera

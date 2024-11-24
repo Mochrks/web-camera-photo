@@ -62,9 +62,8 @@ export default function Home() {
 
 
       <div className="container ">
-        <div className="flex items-center justify-center h-screen">
-          <div className="text-center">
-
+        <div className="flex flex-col items-center justify-center h-screen">
+          <div className=" text-center">
             <div className="container ">
               <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-4xl py-10">
                 Scan here to continue
@@ -95,7 +94,17 @@ export default function Home() {
                 </CardFooter>
               </Card>
             </div>
+          </div>
 
+          <div className='py-10 text-center'>
+            <h3 className="scroll-m-20 text-xl font-extrabold tracking-tight py-5">
+              Or
+            </h3>
+            <Link href="/capture">
+              <Button >
+                Capture Now !!
+              </Button>
+            </Link>
           </div>
         </div>
       </div>

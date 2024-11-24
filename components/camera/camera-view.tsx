@@ -1,8 +1,9 @@
-"use client";;
+"use client";
+
 import React, { useEffect, useImperativeHandle, useState } from "react";
-import { useCamera } from "@/components/camera/camera-provider"; // Adjust import path as necessary
+import { useCamera } from "@/components/camera/camera-provider";
 import { CameraProps, defaultErrorMessages } from "./camera-types";
-import { TriangleAlert, X } from "lucide-react";
+import { TriangleAlert, X } from 'lucide-react';
 
 export const CameraView = React.forwardRef<unknown, CameraProps>(
   (
@@ -100,3 +101,4 @@ function WarningMessage({ message, show }: { message: string; show: boolean }) {
     </div>
   ) : null;
 }
+

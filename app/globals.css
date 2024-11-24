@@ -80,3 +80,22 @@
     @apply bg-background text-foreground;
   }
 }
+
+
+@layer utilities {
+  .animate-flash {
+    animation: flash 0.3s;
+  }
+}
+
+@keyframes flash {
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
