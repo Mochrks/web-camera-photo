@@ -1,12 +1,19 @@
 "use client";
 
-import { ArrowLeftRight, Printer, X, Images, Download } from "lucide-react";
+import { ArrowLeftRight, Images, X } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { CameraView } from "./camera-view";
-import { FC, useRef, useState } from "react";
+import { FC, useRef, useState, useEffect } from "react";
 import { CameraType } from "@/components/camera/camera-types";
 import { useCamera } from "@/components/camera/camera-provider";
 import { cn } from "@/lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -15,57 +22,44 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Layout1, Layout2, Layout3 } from "./photo-layouts";
-import React from "react";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
+import { ScrollArea } from '../ui/scroll-area';
 
 interface CameraProps {
   onClosed: () => void;
   onCapturedImages: (images: string[]) => void;
+  requiredPhotos: number
 }
 
-const Camera: FC<CameraProps> = ({ onClosed, onCapturedImages }) => {
+const Camera: FC<CameraProps> = ({ onClosed, onCapturedImages, requiredPhotos }) => {
   const camera = useRef<CameraType>();
-  const videoRef = useRef<HTMLVideoElement>(null);
   const { images, addImage, numberOfCameras, resetImages, stopStream } = useCamera();
+  const [photoCount, setPhotoCount] = useState(0);
   const [timerActive, setTimerActive] = useState(false);
   const [timerDuration, setTimerDuration] = useState(4);
-  const [timerCount, setTimerCount] = useState(0);
   const [showFlash, setShowFlash] = useState(false);
   const [showGrid, setShowGrid] = useState(false);
-  const [selectedLayout, setSelectedLayout] = useState<number | null>(null);
-  const [finalImage, setFinalImage] = useState<string | null>(null);
+  const [timerCount, setTimerCount] = useState(0);
 
-  const handleCapture = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (timerCount > 0) {
+      timer = setTimeout(() => {
+        setTimerCount(timerCount - 1);
+        if (timerCount === 1) {
+          capturePhoto();
+        }
+      }, 1000);
+    }
+    return () => clearTimeout(timer);
+  }, [timerCount]);
+
+  const handleCapture = () => {
     if (timerActive) {
-      startTimer();
+      setTimerCount(timerDuration);
     } else {
       capturePhoto();
     }
-  };
-
-  const startTimer = () => {
-    setTimerCount(timerDuration);
-    const timer = setInterval(() => {
-      setTimerCount((prevCount) => {
-        if (prevCount === 1) {
-          clearInterval(timer);
-          capturePhoto();
-          return 0;
-        }
-        return prevCount - 1;
-      });
-    }, 1000);
-  };
+  }
 
   const capturePhoto = () => {
     if (camera.current) {
@@ -74,54 +68,37 @@ const Camera: FC<CameraProps> = ({ onClosed, onCapturedImages }) => {
         const imageData = camera.current?.takePhoto();
         if (imageData) {
           addImage(imageData);
+          setPhotoCount(prev => {
+            const newCount = prev + 1;
+            if (newCount === requiredPhotos) {
+              onCapturedImages([...images, imageData]);
+            }
+            return newCount;
+          });
         }
         setShowFlash(false);
       }, 150);
     }
   };
 
-  const handleOnClosed = () => {
+  const handleClose = () => {
     stopStream();
     onClosed();
-  };
-
-  const handleOnCapturedImages = (images: string[]) => {
-    onCapturedImages(images);
-    resetImages();
-    handleOnClosed();
-  };
-
-  const handleLayoutSave = (dataUrl: string) => {
-    setFinalImage(dataUrl);
-  };
-
-  const handleDownload = () => {
-    if (finalImage) {
-      const link = document.createElement('a');
-      link.href = finalImage;
-      link.download = 'photo-booth-layout.jpg';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
-  };
+    window.location.reload();
+  }
 
   return (
     <div className="z-10 flex min-h-screen w-full flex-col bg-black">
       <div className="relative flex-1">
-        <div className="z-99">
-
-        </div>
-        <div className="absolute z-10 w-full h-16 flex justify-between items-center px-4 ">
+        <div className="absolute z-10 w-full h-16 flex justify-between items-center px-4">
           <Button
             className="rounded-full p-2 bg-gray-800 text-white hover:bg-gray-700"
             size="icon"
-            onClick={handleOnClosed}
+            onClick={handleClose}
           >
             <X className="h-6 w-6" />
+            <span className="sr-only">Close camera</span>
           </Button>
-
-
           <div className="flex space-x-2">
             <Select
               value={timerActive ? timerDuration.toString() : "off"}
@@ -159,6 +136,7 @@ const Camera: FC<CameraProps> = ({ onClosed, onCapturedImages }) => {
                 <line x1="9" y1="3" x2="9" y2="21"></line>
                 <line x1="15" y1="3" x2="15" y2="21"></line>
               </svg>
+              <span className="sr-only">Toggle grid</span>
             </Button>
           </div>
         </div>
@@ -175,49 +153,24 @@ const Camera: FC<CameraProps> = ({ onClosed, onCapturedImages }) => {
           </div>
         )}
 
-
-
-
         <div className="absolute bottom-1 left-0 right-0 flex justify-center items-center space-x-20 md:space-x-10 bg-gray-600 bg-opacity-30 py-14">
           <Gallery />
           <Button
             className="h-16 w-16 rounded-full bg-white hover:bg-gray-300 p-2 shadow-lg"
             onClick={handleCapture}
+            disabled={photoCount === requiredPhotos || timerCount > 0}
           >
             <div className="h-14 w-14 rounded-full bg-red-500 hover:bg-red-600" />
+            <span className="sr-only">Capture photo</span>
           </Button>
           {numberOfCameras > 0 && <SwitchCamera />}
         </div>
 
-        <div className="absolute bottom-48 right-4">
-          <LayoutSelector selectedLayout={selectedLayout} setSelectedLayout={setSelectedLayout} />
+        <div className="absolute bottom-48 left-0 right-0 flex justify-center">
+          <Button disabled={photoCount === requiredPhotos}>
+            Capture ({photoCount}/{requiredPhotos})
+          </Button>
         </div>
-
-        {selectedLayout !== null && images.length >= 3 && (
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button className="absolute rounded-full bottom-48 right-20 z-10 bg-green-500 hover:bg-green-600 text-white">
-                Create Templates
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="w-full ">
-              <DialogHeader>
-                <DialogTitle>Photo Booth Layout</DialogTitle>
-              </DialogHeader>
-              <ScrollArea className="h-full">
-                {selectedLayout === 1 && <Layout1 images={images.slice(0, 3)} onSave={handleLayoutSave} />}
-                {selectedLayout === 2 && <Layout2 images={images.slice(0, 3)} onSave={handleLayoutSave} />}
-                {selectedLayout === 3 && <Layout3 images={images.slice(0, 3)} onSave={handleLayoutSave} />}
-              </ScrollArea>
-              {finalImage && (
-                <Button onClick={handleDownload} className="mt-4">
-                  <Download className="mr-2 h-4 w-4" /> Download
-                </Button>
-              )}
-            </DialogContent>
-          </Dialog>
-        )}
-
 
         {timerCount > 0 && (
           <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
@@ -233,94 +186,6 @@ const Camera: FC<CameraProps> = ({ onClosed, onCapturedImages }) => {
   );
 };
 
-interface LayoutSelectorProps {
-  selectedLayout: number | null;
-  setSelectedLayout: (layout: number) => void;
-}
-
-const LayoutSelector: React.FC<LayoutSelectorProps> = ({ selectedLayout, setSelectedLayout }) => {
-  const [isOpen, setIsOpen] = React.useState(false);
-
-  const handleLayoutSelect = (layout: number) => {
-    setSelectedLayout(layout);
-    setIsOpen(false);
-  };
-
-  const layouts = [
-    {
-      id: 1,
-      name: 'Classic Vertical',
-      skeleton: (
-        <div className="w-full h-40 bg-gray-200 flex flex-col">
-          <div className="h-1/3 border-b-2 border-white"></div>
-          <div className="h-1/3 border-b-2 border-white"></div>
-          <div className="h-1/3"></div>
-        </div>
-      ),
-    },
-    {
-      id: 2,
-      name: 'Modern Grid',
-      skeleton: (
-        <div className="w-full h-40 bg-gray-200 grid grid-cols-2 grid-rows-2 gap-1">
-          <div className="bg-white"></div>
-          <div className="bg-white"></div>
-          <div className="bg-white"></div>
-          <div className="bg-white"></div>
-        </div>
-      ),
-    },
-    {
-      id: 3,
-      name: 'Polaroid Style',
-      skeleton: (
-        <div className="w-full h-40 bg-gray-200 flex justify-center items-center">
-          <div className="w-3/4 h-3/4 bg-white border-8 border-gray-300 transform rotate-6"></div>
-        </div>
-      ),
-    },
-  ];
-
-  return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button variant="outline" onClick={() => setIsOpen(true)}>
-              <Printer className="h-10 w-10" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Select templates</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>Select a Template</DialogTitle>
-        </DialogHeader>
-        <div className="grid grid-cols-1 gap-4">
-          {layouts.map((layout) => (
-            <Button
-              key={layout.id}
-              variant="outline"
-              className={`h-auto p-4 ${selectedLayout === layout.id ? 'ring-2 ring-blue-500' : ''}`}
-              onClick={() => handleLayoutSelect(layout.id)}
-            >
-              <div className="w-full space-y-2">
-                <div className="font-semibold">{layout.name}</div>
-                {layout.skeleton}
-              </div>
-            </Button>
-          ))}
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-};
-
-
-
 function SwitchCamera() {
   const { devices, setActiveDeviceId, activeDeviceId, switchCamera } = useCamera();
 
@@ -333,6 +198,7 @@ function SwitchCamera() {
         onClick={switchCamera}
       >
         <ArrowLeftRight className="fixed h-6 w-6" />
+        <span className="sr-only">Switch camera</span>
       </Button>
     );
   }
@@ -342,9 +208,10 @@ function SwitchCamera() {
         <Button
           variant={"default"}
           size={"icon"}
-          className=" w-16 h-10  bg-gray-800 text-white hover:bg-gray-700"
+          className="w-16 h-10 bg-gray-800 text-white hover:bg-gray-700"
         >
-          <ArrowLeftRight className="fixed h-6 w-6  " />
+          <ArrowLeftRight className="fixed h-6 w-6" />
+          <span className="sr-only">Switch camera</span>
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
@@ -374,14 +241,14 @@ function SwitchCamera() {
   );
 }
 
-export function Gallery() {
+function Gallery() {
   const { images, removeImage } = useCamera();
 
   return (
     <Dialog>
       <DialogTrigger asChild>
         <Button
-          className="flex items-center justify-center  w-16 h-10 p-2 bg-gray-800 text-white hover:bg-gray-700 transition duration-200"
+          className="flex items-center justify-center w-16 h-10 p-2 bg-gray-800 text-white hover:bg-gray-700 transition duration-200"
           size="icon"
         >
           <Images className="h-6 w-6" />
@@ -390,6 +257,7 @@ export function Gallery() {
               ({images.length})
             </span>
           )}
+          <span className="sr-only">View gallery</span>
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[90vw] sm:max-h-[90vh]">
@@ -407,6 +275,7 @@ export function Gallery() {
                   onClick={() => removeImage(index)}
                 >
                   <X className="h-4 w-4 text-white" />
+                  <span className="sr-only">Remove image</span>
                 </Button>
               </div>
             ))}
@@ -417,5 +286,5 @@ export function Gallery() {
   );
 }
 
-
 export default Camera;
+

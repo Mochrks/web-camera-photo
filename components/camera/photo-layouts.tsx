@@ -18,8 +18,6 @@ const useAutoSave = (canvasRef: React.RefObject<HTMLCanvasElement>, onSave: (dat
 const Layout1: React.FC<LayoutProps> = ({ images, onSave }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
-    useAutoSave(canvasRef, onSave);
-
     useEffect(() => {
         if (canvasRef.current && images.length >= 3) {
             const canvas = canvasRef.current;
@@ -56,19 +54,19 @@ const Layout1: React.FC<LayoutProps> = ({ images, onSave }) => {
 
                 // Add a decorative border
                 drawFrame(ctx, 10, 10, canvas.width - 20, canvas.height - 20, '#ffd700', 10);
+
+                onSave(canvas.toDataURL('image/jpeg'));
             };
 
             loadAndDrawImages();
         }
-    }, [images]);
+    }, [images, onSave]);
 
     return <canvas ref={canvasRef} style={{ maxWidth: '100%', height: 'auto' }} />;
 };
 
 const Layout2: React.FC<LayoutProps> = ({ images, onSave }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
-
-    useAutoSave(canvasRef, onSave);
 
     useEffect(() => {
         if (canvasRef.current && images.length >= 3) {
@@ -79,52 +77,97 @@ const Layout2: React.FC<LayoutProps> = ({ images, onSave }) => {
             canvas.width = 900;
             canvas.height = 700;
 
-            // Background
-            const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-            gradient.addColorStop(0, '#ff9a9e');
-            gradient.addColorStop(1, '#fad0c4');
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            // Background with pattern
+            const patternCanvas = document.createElement('canvas');
+            const patternCtx = patternCanvas.getContext('2d');
+            if (!patternCtx) return;
 
-            // Title
-            drawText(ctx, 'Capture the Moment', canvas.width / 2, 70, 'bold 36px Poppins', '#fff');
+            patternCanvas.width = 20;
+            patternCanvas.height = 20;
+
+            // Draw a simple pattern
+            patternCtx.fillStyle = '#ff9a9e';
+            patternCtx.fillRect(0, 0, 20, 20);
+            patternCtx.fillStyle = '#fad0c4';
+            patternCtx.fillRect(0, 0, 10, 10);
+            const pattern = ctx.createPattern(patternCanvas, 'repeat');
+
+            if (pattern) {
+                ctx.fillStyle = pattern;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+
+            // Title with white color
+            const title = 'Capture the Moment';
+            ctx.fillStyle = '#ffffff'; // Set text color to white
+            ctx.font = 'bold 48px Poppins';
+            ctx.textAlign = 'center';
+            ctx.fillText(title, canvas.width / 2, 70);
 
             const loadAndDrawImages = async () => {
                 const positions = [
-                    { x: 50, y: 100, width: 350, height: 450 },
-                    { x: 420, y: 100, width: 160, height: 220 },
-                    { x: 420, y: 330, width: 160, height: 220 },
+                    { x: 50, y: 100, width: 450, height: 450 },
+                    { x: 520, y: 100, width: 300, height: 220 },
+                    { x: 520, y: 330, width: 300, height: 220 },
                 ];
 
                 for (let i = 0; i < 3; i++) {
                     const { x, y, width, height } = positions[i];
                     ctx.save();
-                    ctx.shadowColor = 'rgba(0,0,0,0.3)';
-                    ctx.shadowBlur = 10;
-                    ctx.shadowOffsetX = 5;
+                    ctx.shadowColor = 'rgba(0,0,0,0.5)';
+                    ctx.shadowBlur = 15;
+                    ctx.shadowOffsetX = 0;
                     ctx.shadowOffsetY = 5;
-                    await drawImage(ctx, images[i], x, y, width, height);
+                    // Draw image with rounded corners
+                    await drawRoundedImage(ctx, images[i], x, y, width, height, 20);
                     ctx.restore();
                 }
 
-                // Add decorative elements
-                drawText(ctx, 'Created on: ' + new Date().toLocaleDateString(), canvas.width - 50, canvas.height - 50, '20px Poppins', '#fff', 'right');
+                // Decorative text with white color
+                ctx.fillStyle = '#ffffff'; // Set text color to white
+                ctx.font = '20px Poppins';
+                ctx.textAlign = 'right';
+                ctx.fillText('Created on: ' + new Date().toLocaleDateString(), canvas.width - 50, canvas.height - 50);
 
-                // Add a decorative frame
+                // Decorative frame
                 drawFrame(ctx, 25, 25, canvas.width - 50, canvas.height - 50, '#fff', 15);
+
+                onSave(canvas.toDataURL('image/jpeg'));
             };
 
             loadAndDrawImages();
         }
-    }, [images]);
+    }, [images, onSave]);
+
+    // Function to draw image with rounded corners
+    const drawRoundedImage = (ctx: CanvasRenderingContext2D, imgSrc: string, x: number, y: number, width: number, height: number, radius: number) => {
+        return new Promise<void>((resolve) => {
+            const img = new Image();
+            img.src = imgSrc;
+            img.onload = () => {
+                ctx.beginPath();
+                ctx.moveTo(x + radius, y);
+                ctx.lineTo(x + width - radius, y);
+                ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+                ctx.lineTo(x + width, y + height - radius);
+                ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+                ctx.lineTo(x + radius, y + height);
+                ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+                ctx.lineTo(x, y + radius);
+                ctx.quadraticCurveTo(x, y, x + radius, y);
+                ctx.closePath();
+                ctx.clip();
+                ctx.drawImage(img, x, y, width, height);
+                resolve();
+            };
+        });
+    };
 
     return <canvas ref={canvasRef} style={{ maxWidth: '100%', height: 'auto' }} />;
 };
 
 const Layout3: React.FC<LayoutProps> = ({ images, onSave }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
-
-    useAutoSave(canvasRef, onSave);
 
     useEffect(() => {
         if (canvasRef.current && images.length >= 3) {
@@ -169,14 +212,19 @@ const Layout3: React.FC<LayoutProps> = ({ images, onSave }) => {
 
                 // Add a decorative border
                 drawFrame(ctx, 20, 20, canvas.width - 40, canvas.height - 40, '#fff', 5);
+
+                onSave(canvas.toDataURL('image/jpeg'));
             };
 
             loadAndDrawImages();
         }
-    }, [images]);
+    }, [images, onSave]);
 
     return <canvas ref={canvasRef} style={{ maxWidth: '100%', height: 'auto' }} />;
 };
 
-export { Layout1, Layout2, Layout3 };
+export {
+    Layout1, Layout2,
+    Layout3
+};
 
