@@ -106,9 +106,9 @@ const Layout2: React.FC<LayoutProps> = ({ images, onSave }) => {
 
             const loadAndDrawImages = async () => {
                 const positions = [
-                    { x: 50, y: 100, width: 450, height: 450 },
-                    { x: 520, y: 100, width: 300, height: 220 },
-                    { x: 520, y: 330, width: 300, height: 220 },
+                    { x: 50, y: 100, width: 520, height: 450 },
+                    { x: 600, y: 100, width: 250, height: 220 },
+                    { x: 600, y: 330, width: 250, height: 220 },
                 ];
 
                 for (let i = 0; i < 3; i++) {
@@ -196,9 +196,9 @@ const Layout3: React.FC<LayoutProps> = ({ images, onSave }) => {
 
             const loadAndDrawImages = async () => {
                 const positions = [
-                    { x: 50, y: 100, width: 250, height: 200, rotation: -0.1 },
-                    { x: 300, y: 300, width: 250, height: 200, rotation: 0.1 },
-                    { x: 100, y: 550, width: 250, height: 200, rotation: -0.05 },
+                    { x: 50, y: 100, width: 310, height: 200, rotation: -0.1 },
+                    { x: 230, y: 320, width: 310, height: 200, rotation: 0.1 },
+                    { x: 100, y: 550, width: 310, height: 200, rotation: -0.05 },
                 ];
 
                 for (let i = 0; i < 3; i++) {
@@ -224,7 +224,6 @@ const Layout3: React.FC<LayoutProps> = ({ images, onSave }) => {
 };
 
 export {
-    Layout1, Layout2,
-    Layout3
+    Layout1, Layout2, Layout3
 };
 
