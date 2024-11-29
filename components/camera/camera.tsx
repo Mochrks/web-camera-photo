@@ -23,6 +23,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { ScrollArea } from '../ui/scroll-area';
+import { FilterTone } from './filter-tone';
+import { AdjustmentPanel } from './adjustment-panel';
 
 interface CameraProps {
   onClosed: () => void;
@@ -90,7 +92,8 @@ const Camera: FC<CameraProps> = ({ onClosed, onCapturedImages, requiredPhotos })
   return (
     <div className="z-10 flex min-h-screen w-full flex-col bg-black">
       <div className="relative flex-1">
-        <div className="absolute z-10 w-full h-16 flex justify-between items-center px-4">
+        <div className="absolute z-20 w-full h-16 flex justify-between items-center px-4">
+          {/* button back */}
           <Button
             className="rounded-full p-2 bg-gray-800 text-white hover:bg-gray-700"
             size="icon"
@@ -100,6 +103,11 @@ const Camera: FC<CameraProps> = ({ onClosed, onCapturedImages, requiredPhotos })
             <span className="sr-only">Close camera</span>
           </Button>
           <div className="flex space-x-2">
+            {/* filters */}
+            <FilterTone />
+            {/* adjustment */}
+            <AdjustmentPanel />
+            {/* timer */}
             <Select
               value={timerActive ? timerDuration.toString() : "off"}
               onValueChange={(value) => {
@@ -121,6 +129,7 @@ const Camera: FC<CameraProps> = ({ onClosed, onCapturedImages, requiredPhotos })
                 <SelectItem value="10">10s</SelectItem>
               </SelectContent>
             </Select>
+            {/* grid */}
             <Button
               className={cn(
                 "rounded-full p-2",
@@ -141,17 +150,10 @@ const Camera: FC<CameraProps> = ({ onClosed, onCapturedImages, requiredPhotos })
           </div>
         </div>
 
-        <CameraView ref={camera} />
 
-        {showGrid && (
-          <div className="absolute inset-0 pointer-events-none">
-            <div className="w-full h-full grid grid-cols-3 grid-rows-3">
-              {[...Array(9)].map((_, i) => (
-                <div key={i} className="border border-white opacity-30"></div>
-              ))}
-            </div>
-          </div>
-        )}
+
+
+        <CameraView ref={camera} />
 
         <div className="absolute bottom-1 left-0 right-0 flex justify-center items-center space-x-20 md:space-x-10 bg-gray-600 bg-opacity-30 py-14">
           <Gallery />
@@ -171,6 +173,16 @@ const Camera: FC<CameraProps> = ({ onClosed, onCapturedImages, requiredPhotos })
             Capture ({photoCount}/{requiredPhotos})
           </Button>
         </div>
+
+        {showGrid && (
+          <div className="absolute inset-0 pointer-events-none">
+            <div className="w-full h-full grid grid-cols-3 grid-rows-3">
+              {[...Array(9)].map((_, i) => (
+                <div key={i} className="border border-gray-600 opacity-40"></div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {timerCount > 0 && (
           <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">

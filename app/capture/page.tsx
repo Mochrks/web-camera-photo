@@ -59,7 +59,7 @@ export default function PhotoBooth() {
                 </div>
             )}
             {finalImage && (
-                <div className="flex flex-col items-center">
+                <div className="flex flex-col items-center p-20 ">
 
                     <img src={finalImage} alt="Final Layout" className="max-w-full h-auto mb-4" />
                     <div className="flex gap-4 z-10">
