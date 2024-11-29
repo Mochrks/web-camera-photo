@@ -72,7 +72,7 @@ export function AdjustmentPanel() {
                     isOpen ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0"
                 )}
             >
-                <div className="flex flex-col items-center justify-center w-full p-4 mt-0 md:mt-2">
+                <div className="flex flex-col items-center justify-center w-full  mt-0 md:mt-5 ">
                     <div className='flex flex-col items-center justify-center w-[36rem] rounded-2xl bg-gray-800 bg-opacity-60 backdrop-blur-sm p-4'>
                         <div className="flex justify-between items-center mb-4">
                             <h2 className="text-lg font-semibold text-white">Adjustments</h2>

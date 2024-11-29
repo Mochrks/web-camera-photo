@@ -155,7 +155,7 @@ const Camera: FC<CameraProps> = ({ onClosed, onCapturedImages, requiredPhotos })
 
         <CameraView ref={camera} />
 
-        <div className="absolute bottom-1 left-0 right-0 flex justify-center items-center space-x-20 md:space-x-10 bg-gray-600 bg-opacity-30 py-14">
+        <div className="absolute bottom-1 left-0 right-0 flex justify-center items-center space-x-20 md:space-x-10 bg-gray-600 bg-opacity-40 py-14">
           <Gallery />
           <Button
             className="h-16 w-16 rounded-full bg-white hover:bg-gray-300 p-2 shadow-lg"

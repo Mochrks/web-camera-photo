@@ -96,6 +96,42 @@ export const works: Artwork[] = [
         nameFilter: "Blue Velvet",
         images: "https://photoshopdesire.com/wp-content/uploads/2018/10/Before-How-to-Get-Dark-and-Moody-Tones-Color-Effect-in-Photoshop.jpg",
     },
+    {
+        nameFilter: "Midnight Azure",
+        images: "https://photoshopdesire.com/wp-content/uploads/2018/10/Before-How-to-Get-Dark-and-Moody-Tones-Color-Effect-in-Photoshop.jpg",
+    },
+    {
+        nameFilter: "Royal Blue Horizon",
+        images: "https://photoshopdesire.com/wp-content/uploads/2018/10/Before-How-to-Get-Dark-and-Moody-Tones-Color-Effect-in-Photoshop.jpg",
+    },
+    {
+        nameFilter: "Prussian Blue",
+        images: "https://photoshopdesire.com/wp-content/uploads/2018/10/Before-How-to-Get-Dark-and-Moody-Tones-Color-Effect-in-Photoshop.jpg",
+    },
+    {
+        nameFilter: "Arctic Breeze",
+        images: "https://photoshopdesire.com/wp-content/uploads/2018/10/Before-How-to-Get-Dark-and-Moody-Tones-Color-Effect-in-Photoshop.jpg",
+    },
+    {
+        nameFilter: "Denim Blue",
+        images: "https://photoshopdesire.com/wp-content/uploads/2018/10/Before-How-to-Get-Dark-and-Moody-Tones-Color-Effect-in-Photoshop.jpg",
+    },
+    {
+        nameFilter: "Celestial Blue",
+        images: "https://photoshopdesire.com/wp-content/uploads/2018/10/Before-How-to-Get-Dark-and-Moody-Tones-Color-Effect-in-Photoshop.jpg",
+    },
+    {
+        nameFilter: "Deep Sky Blue",
+        images: "https://photoshopdesire.com/wp-content/uploads/2018/10/Before-How-to-Get-Dark-and-Moody-Tones-Color-Effect-in-Photoshop.jpg",
+    },
+    {
+        nameFilter: "Mediterranean Blue",
+        images: "https://photoshopdesire.com/wp-content/uploads/2018/10/Before-How-to-Get-Dark-and-Moody-Tones-Color-Effect-in-Photoshop.jpg",
+    },
+    {
+        nameFilter: "Ultramarine Dream",
+        images: "https://photoshopdesire.com/wp-content/uploads/2018/10/Before-How-to-Get-Dark-and-Moody-Tones-Color-Effect-in-Photoshop.jpg",
+    }
 ]
 
 
@@ -133,10 +169,10 @@ export function FilterTone() {
                     isOpen ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0"
                 )}
             >
-                <ScrollArea className="w-full h-28 md:h-[110px] whitespace-nowrap  p-2 bg-gray-600 bg-opacity-90 backdrop-blur-sm">
+                <ScrollArea className="w-full h-28 md:h-[110px] whitespace-nowrap p-2 bg-gray-600 bg-opacity-90 backdrop-blur-sm">
                     <div className="flex w-max space-x-4 p-4">
                         {works.map((artwork) => (
-                            <figure key={artwork.nameFilter} className="shrink-0">
+                            <figure key={artwork.nameFilter} className="shrink-0 w-20 flex flex-col items-center">
                                 <div className="overflow-hidden rounded-md flex justify-center">
                                     <Image
                                         src={artwork.images}
@@ -147,7 +183,8 @@ export function FilterTone() {
                                         sizes="(min-width: 768px) 36px, 40px"
                                     />
                                 </div>
-                                <figcaption className="pt-2 text-[8px] md:text-xs text-white text-center">
+                                <figcaption className="pt-2 text-[8px] md:text-xs text-white text-center 
+                    whitespace-normal break-words w-full">
                                     {artwork.nameFilter}
                                 </figcaption>
                             </figure>
