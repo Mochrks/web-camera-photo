@@ -3,34 +3,34 @@
 import { useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
+import { Card, CardContent, CardFooter } from "@/components/ui/card"
+import { Trash2, Edit, Plus, Upload } from 'lucide-react'
+import Image from 'next/image'
+
+interface Frame {
+    id: number;
+    name: string;
+    width: number;
+    height: number;
+    imageUrl: string;
+}
 
 export default function FrameComponent() {
-    const [frames, setFrames] = useState([
-        { id: 1, name: 'Classic', layout: '2x2' },
-        { id: 2, name: 'Modern', layout: '3x3' },
-        { id: 3, name: 'Vintage', layout: '1x3' },
+    const [frames, setFrames] = useState<Frame[]>([
+        { id: 1, name: 'Classic', width: 2, height: 2, imageUrl: '/placeholder.svg?height=200&width=200' },
+        { id: 2, name: 'Modern', width: 3, height: 3, imageUrl: '/placeholder.svg?height=300&width=300' },
+        { id: 3, name: 'Vintage', width: 1, height: 3, imageUrl: '/placeholder.svg?height=300&width=100' },
     ])
-    const [currentPage, setCurrentPage] = useState(1)
-    const [itemsPerPage] = useState(5)
-
-    const indexOfLastItem = currentPage * itemsPerPage
-    const indexOfFirstItem = indexOfLastItem - itemsPerPage
-    const currentItems = frames.slice(indexOfFirstItem, indexOfLastItem)
-
-    const pageNumbers = []
-    for (let i = 1; i <= Math.ceil(frames.length / itemsPerPage); i++) {
-        pageNumbers.push(i)
-    }
-
-    const [newFrame, setNewFrame] = useState({ name: '', layout: '' })
+    const [newFrame, setNewFrame] = useState<Omit<Frame, 'id' | 'imageUrl'>>({ name: '', width: 1, height: 1 })
     const [selectedFile, setSelectedFile] = useState<File | null>(null)
 
     const handleAddFrame = () => {
-        setFrames([...frames, { id: frames.length + 1, ...newFrame }])
-        setNewFrame({ name: '', layout: '' })
+        const newId = Math.max(...frames.map(f => f.id), 0) + 1
+        const imageUrl = selectedFile ? URL.createObjectURL(selectedFile) : '/placeholder.svg?height=200&width=200'
+        setFrames([...frames, { id: newId, ...newFrame, imageUrl }])
+        setNewFrame({ name: '', width: 1, height: 1 })
         setSelectedFile(null)
     }
 
@@ -39,26 +39,26 @@ export default function FrameComponent() {
     }
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files) {
+        if (e.target.files && e.target.files[0]) {
             setSelectedFile(e.target.files[0])
         }
     }
 
     return (
-        <div>
+        <div className="space-y-6">
             <Dialog>
                 <DialogTrigger asChild>
-                    <Button className="mb-4">Add New Frame</Button>
+                    <Button className="mb-4">
+                        <Plus className="mr-2 h-4 w-4" /> Add New Frame
+                    </Button>
                 </DialogTrigger>
-                <DialogContent>
+                <DialogContent className="sm:max-w-[425px]">
                     <DialogHeader>
                         <DialogTitle>Add New Frame</DialogTitle>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
                         <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="name" className="text-right">
-                                Name
-                            </Label>
+                            <Label htmlFor="name" className="text-right">Name</Label>
                             <Input
                                 id="name"
                                 value={newFrame.name}
@@ -67,25 +67,33 @@ export default function FrameComponent() {
                             />
                         </div>
                         <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="layout" className="text-right">
-                                Layout
-                            </Label>
+                            <Label htmlFor="width" className="text-right">Width</Label>
                             <Input
-                                id="layout"
-                                value={newFrame.layout}
-                                onChange={(e) => setNewFrame({ ...newFrame, layout: e.target.value })}
+                                id="width"
+                                type="number"
+                                value={newFrame.width}
+                                onChange={(e) => setNewFrame({ ...newFrame, width: parseInt(e.target.value) })}
                                 className="col-span-3"
                             />
                         </div>
                         <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="file" className="text-right">
-                                Upload Photo
-                            </Label>
+                            <Label htmlFor="height" className="text-right">Height</Label>
+                            <Input
+                                id="height"
+                                type="number"
+                                value={newFrame.height}
+                                onChange={(e) => setNewFrame({ ...newFrame, height: parseInt(e.target.value) })}
+                                className="col-span-3"
+                            />
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="file" className="text-right">Frame Image</Label>
                             <Input
                                 id="file"
                                 type="file"
                                 onChange={handleFileChange}
                                 className="col-span-3"
+                                accept="image/*"
                             />
                         </div>
                     </div>
@@ -93,39 +101,34 @@ export default function FrameComponent() {
                 </DialogContent>
             </Dialog>
 
-            <Table>
-                <TableHeader>
-                    <TableRow>
-                        <TableHead>Name</TableHead>
-                        <TableHead>Layout</TableHead>
-                        <TableHead>Actions</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {currentItems.map((frame) => (
-                        <TableRow key={frame.id}>
-                            <TableCell>{frame.name}</TableCell>
-                            <TableCell>{frame.layout}</TableCell>
-                            <TableCell>
-                                <Button variant="outline" size="sm" className="mr-2">Edit</Button>
-                                <Button variant="destructive" size="sm" onClick={() => handleDeleteFrame(frame.id)}>Delete</Button>
-                            </TableCell>
-                        </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
-
-            <div className="flex justify-center mt-4">
-                {pageNumbers.map(number => (
-                    <Button
-                        key={number}
-                        variant={currentPage === number ? "default" : "outline"}
-                        size="sm"
-                        className="mx-1"
-                        onClick={() => setCurrentPage(number)}
-                    >
-                        {number}
-                    </Button>
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {frames.map((frame) => (
+                    <Card key={frame.id} className="overflow-hidden">
+                        <CardContent className="p-0">
+                            <div className="relative aspect-square">
+                                <Image
+                                    src={frame.imageUrl}
+                                    alt={frame.name}
+                                    fill
+                                    className="object-cover"
+                                />
+                            </div>
+                        </CardContent>
+                        <CardFooter className="flex justify-between items-center p-4">
+                            <div>
+                                <h3 className="font-semibold">{frame.name}</h3>
+                                <p className="text-sm text-gray-500">{frame.width}x{frame.height}</p>
+                            </div>
+                            <div className="flex space-x-2">
+                                <Button variant="outline" size="icon">
+                                    <Edit className="h-4 w-4" />
+                                </Button>
+                                <Button variant="destructive" size="icon" onClick={() => handleDeleteFrame(frame.id)}>
+                                    <Trash2 className="h-4 w-4" />
+                                </Button>
+                            </div>
+                        </CardFooter>
+                    </Card>
                 ))}
             </div>
         </div>

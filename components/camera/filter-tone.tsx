@@ -169,7 +169,7 @@ export function FilterTone() {
                     isOpen ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0"
                 )}
             >
-                <ScrollArea className="w-full h-28 md:h-[110px] whitespace-nowrap p-2 bg-gray-600 bg-opacity-90 backdrop-blur-sm">
+                <ScrollArea className="w-full h-28 md:h-[120px] whitespace-nowrap p-2 bg-gray-600 bg-opacity-90 backdrop-blur-sm">
                     <div className="flex w-max space-x-4 p-4">
                         {works.map((artwork) => (
                             <figure key={artwork.nameFilter} className="shrink-0 w-20 flex flex-col items-center">

@@ -86,7 +86,7 @@ export default function PromoComponent() {
                 </DialogContent>
             </Dialog>
 
-            <Table>
+            <Table className='border-2 rounded-xl mt-5'>
                 <TableHeader>
                     <TableRow>
 
@@ -110,7 +110,7 @@ export default function PromoComponent() {
                 </TableBody>
             </Table>
 
-            <div className="flex justify-center mt-4">
+            <div className="flex justify-end mt-4 bg-gray-200 p-4 rounded-xl">
                 {pageNumbers.map(number => (
                     <Button
                         key={number}

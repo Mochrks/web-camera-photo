@@ -53,13 +53,12 @@ export default function Home() {
 
 
   return (
-    <main className="flex flex-col gap-5 min-h-screen items-center justify-center p-24">
+    <main className="flex flex-col gap-2 min-h-screen items-center justify-center ">
       <Link href="/generate-qrcode" className='hidden'>
         <Button >
           Generate Qrcode
         </Button>
       </Link>
-
 
       <div className="container ">
         <div className="flex flex-col items-center justify-center h-screen">
@@ -108,6 +107,14 @@ export default function Home() {
           </div>
         </div>
       </div>
-    </main>
+      <footer className="flex items-end w-full bg-slate-700 py-2 text-white">
+        <div className="container mx-auto flex justify-center items-center py-4">
+          <p className="text-sm  text-center">
+            © {new Date().getFullYear()} All rights reserved by <a href="https://github.com/Mochrks" className="hover:underline">@mochrks</a>
+          </p>
+        </div>
+      </footer >
+    </main >
+
   )
 }

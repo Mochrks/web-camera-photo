@@ -7,7 +7,7 @@ import { Layout1, Layout2, Layout3 } from '../../components/camera/photo-layouts
 import { Button } from '@/components/ui/button'
 import type { ConfettiRef } from "../../components/ui/confetti";
 import Confetti from "../../components/ui/confetti"
-
+import { Download, Play, PrinterCheck } from 'lucide-react';
 export default function PhotoBooth() {
     const [selectedLayout, setSelectedLayout] = useState<number | null>(null)
     const [showCamera, setShowCamera] = useState(false)
@@ -34,6 +34,10 @@ export default function PhotoBooth() {
         setCapturedImages([])
         setFinalImage(null)
         window.location.reload();
+    }
+
+    const handlePrintPhoto = () => {
+        window.print();
     }
 
     return (
@@ -63,18 +67,38 @@ export default function PhotoBooth() {
 
                     <img src={finalImage} alt="Final Layout" className="max-w-full h-auto mb-4" />
                     <div className="flex gap-4 z-10">
-                        <Button onClick={handleStartOver}>
-                            Start Over
+                        <Button
+                            variant="default"
+                            size="icon"
+                            onClick={handleStartOver}
+                            className=" w-full px-5"
+                        >
+                            <Play className='w-5 h5 ' />Start Over
                         </Button>
-                        <Button onClick={() => {
-                            const link = document.createElement('a')
-                            link.href = finalImage
-                            link.download = 'photo-booth-templates.jpg'
-                            document.body.appendChild(link)
-                            link.click()
-                            document.body.removeChild(link)
-                        }}>
-                            Download
+                        <Button
+                            variant="default"
+                            size="icon"
+                            onClick={() => {
+                                const link = document.createElement('a')
+                                link.href = finalImage
+                                link.download = 'photo-booth-templates.jpg'
+                                document.body.appendChild(link)
+                                link.click()
+                                document.body.removeChild(link)
+                            }}
+                            className=" w-full px-5"
+                        >
+                            <Download className='w-5 h5 ' /> Download
+                        </Button>
+
+                        <Button
+                            variant="default"
+                            size="icon"
+                            onClick={handlePrintPhoto}
+                            className=" w-full px-5"
+
+                        >
+                            <PrinterCheck className='w-5 h5 ' /> Print
                         </Button>
                     </div>
                     <Confetti
@@ -85,8 +109,9 @@ export default function PhotoBooth() {
                         }}
                     />
                 </div>
-            )}
-        </main>
+            )
+            }
+        </main >
     )
 }
 

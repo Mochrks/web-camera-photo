@@ -76,10 +76,10 @@ export default function UserComponent() {
                 </DialogContent>
             </Dialog>
 
-            <Table>
+            <Table className='border-2 rounded-xl mt-5'>
                 <TableHeader>
                     <TableRow>
-
+                        <TableHead>Name</TableHead>
                         <TableHead>Email</TableHead>
                         <TableHead>Actions</TableHead>
                     </TableRow>
@@ -103,7 +103,7 @@ export default function UserComponent() {
                 </TableBody>
             </Table>
 
-            <div className="flex justify-center mt-4">
+            <div className="flex justify-end mt-4 bg-gray-200 p-4 rounded-xl">
                 {pageNumbers.map(number => (
                     <Button
                         key={number}
