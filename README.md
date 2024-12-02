@@ -7,7 +7,7 @@
 </p>
 
 <p align="center">
-  <img src="https://skillicons.dev/icons?i=nextjs,tailwind" alt="Tech Stack Icons" />
+  <img src="https://skillicons.dev/icons?i=nextjs,tailwind,typescript,openai" alt="Tech Stack Icons" />
 </p>
 
 ## About
