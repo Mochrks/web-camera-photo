@@ -9,7 +9,7 @@ const LayoutSelector: React.FC<LayoutSelectorProps> = ({ onSelect }) => {
     const layouts = [
         {
             id: 1,
-            name: 'Classic Vertical',
+            name: 'Classic Vertical Style',
             skeleton: (
                 <div className="w-full h-40 bg-gray-200 flex flex-col">
                     <div className="h-1/3 border-b-2 border-white"></div>
@@ -20,7 +20,7 @@ const LayoutSelector: React.FC<LayoutSelectorProps> = ({ onSelect }) => {
         },
         {
             id: 2,
-            name: 'Modern Grid',
+            name: 'Pattern Style',
             skeleton: (
                 <div className="w-full h-40 bg-gray-200 grid grid-cols-2 grid-rows-2 gap-1">
                     <div className="bg-white"></div>
@@ -39,6 +39,42 @@ const LayoutSelector: React.FC<LayoutSelectorProps> = ({ onSelect }) => {
                 </div>
             ),
         },
+        {
+            id: 4,
+            name: 'Minimalist Style',
+            skeleton: (
+                <div className="w-full h-40 bg-gray-200 flex space-x-2 justify-center items-center">
+                    <div className="w-1/2 h-1/2 bg-gradient-to-r from-gray-300 to-gray-600 rounded-lg"></div>
+                </div>
+            ),
+        },
+        {
+            id: 5,
+            name: 'Circle Kodak Potra-400 Style',
+            skeleton: (
+                <div className="w-full h-40 bg-gradient-to-br from-gray-100 to-gray-200 flex space-x-4 justify-center items-center p-4 rounded-lg">
+                    {/* Circle with gradient and shadow */}
+                    <div className="w-24 h-24 bg-gradient-to-br from-gray-100 to-gray-400 rounded-full shadow-lg transform hover:scale-105 transition-transform duration-300 flex items-center justify-center">
+                        <div className="w-20 h-20 bg-white/20 rounded-full blur-sm absolute"></div>
+                    </div>
+
+
+                </div>
+            ),
+        },
+        {
+            id: 6,
+            name: 'Vintage Grid Style',
+            skeleton: (
+                <div className="w-full h-40 bg-gray-200 flex justify-center items-center">
+                    <div className="w-11/12 h-1/2 bg-white border-4 border-gray-300 flex space-x-2">
+                        <div className="w-1/3 bg-gray-100"></div>
+                        <div className="w-1/3 bg-gray-200"></div>
+                        <div className="w-1/3 bg-gray-300"></div>
+                    </div>
+                </div>
+            ),
+        }
     ];
 
     return (

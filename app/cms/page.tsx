@@ -76,7 +76,7 @@ export default function CMS() {
                 </nav>
             </aside>
 
-            <div className="flex-1 flex flex-col overflow-hidden ">
+            <div className="flex-1 flex flex-col overflow-hidden bg-white border-b-8">
                 {/* Header Component */}
                 <header className=" dark:bg-gray-800 shadow-sm z-10 transition-colors duration-200">
                     <div className="max-w-full mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">

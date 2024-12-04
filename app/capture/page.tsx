@@ -3,7 +3,7 @@
 import { useRef, useState } from 'react'
 import LayoutSelector from '../../components/camera/layout-selector'
 import Camera from '../../components/camera/camera'
-import { Layout1, Layout2, Layout3 } from '../../components/camera/photo-layouts'
+import { Layout1, Layout2, Layout3, Layout4, Layout5, Layout6, } from '../../components/camera/photo-layouts'
 import { Button } from '@/components/ui/button'
 import type { ConfettiRef } from "../../components/ui/confetti";
 import Confetti from "../../components/ui/confetti"
@@ -36,9 +36,7 @@ export default function PhotoBooth() {
         window.location.reload();
     }
 
-    const handlePrintPhoto = () => {
-        window.print();
-    }
+
 
     return (
         <main className="flex min-h-screen flex-col items-center justify-center ">
@@ -60,12 +58,18 @@ export default function PhotoBooth() {
                     {selectedLayout === 1 && <Layout1 images={capturedImages} onSave={handleLayoutSave} />}
                     {selectedLayout === 2 && <Layout2 images={capturedImages} onSave={handleLayoutSave} />}
                     {selectedLayout === 3 && <Layout3 images={capturedImages} onSave={handleLayoutSave} />}
+                    {selectedLayout === 4 && <Layout4 images={capturedImages} onSave={handleLayoutSave} />}
+                    {selectedLayout === 5 && <Layout5 images={capturedImages} onSave={handleLayoutSave} />}
+                    {selectedLayout === 6 && <Layout6 images={capturedImages} onSave={handleLayoutSave} />}
                 </div>
             )}
             {finalImage && (
                 <div className="flex flex-col items-center p-20 ">
 
-                    <img src={finalImage} alt="Final Layout" className="max-w-full h-auto mb-4" />
+                    <div className='border border-gray-600 p-3 m-5'>
+                        <img src={finalImage} alt="Final Layout" className="max-w-full h-auto mb-4 " />
+                    </div>
+
                     <div className="flex gap-4 z-10">
                         <Button
                             variant="default"
@@ -91,15 +95,16 @@ export default function PhotoBooth() {
                             <Download className='w-5 h5 ' /> Download
                         </Button>
 
-                        <Button
+                        {/* <Button
                             variant="default"
                             size="icon"
-                            onClick={handlePrintPhoto}
-                            className=" w-full px-5"
-
+                            onClick={() => {
+                                window.print();
+                            }}
+                            className="w-full px-5"
                         >
-                            <PrinterCheck className='w-5 h5 ' /> Print
-                        </Button>
+                            <PrinterCheck className='w-5 h5' /> Print
+                        </Button> */}
                     </div>
                     <Confetti
                         ref={confettiRef}
