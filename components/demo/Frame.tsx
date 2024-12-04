@@ -1,12 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import toast, { Toaster } from 'react-hot-toast'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
-import { Trash2, Edit, Plus, Upload } from 'lucide-react'
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
+import { Trash2, Edit, Plus } from 'lucide-react'
 import Image from 'next/image'
 
 interface Frame {
@@ -18,35 +20,130 @@ interface Frame {
 }
 
 export default function FrameComponent() {
-    const [frames, setFrames] = useState<Frame[]>([
-        { id: 1, name: 'Classic', width: 2, height: 2, imageUrl: '/placeholder.svg?height=200&width=200' },
-        { id: 2, name: 'Modern', width: 3, height: 3, imageUrl: '/placeholder.svg?height=300&width=300' },
-        { id: 3, name: 'Vintage', width: 1, height: 3, imageUrl: '/placeholder.svg?height=300&width=100' },
-    ])
+    const [frames, setFrames] = useState<Frame[]>([])
+    const [isDialogOpen, setIsDialogOpen] = useState(false)
     const [newFrame, setNewFrame] = useState<Omit<Frame, 'id' | 'imageUrl'>>({ name: '', width: 1, height: 1 })
     const [selectedFile, setSelectedFile] = useState<File | null>(null)
+    const [frameToDelete, setFrameToDelete] = useState<Frame | null>(null)
 
-    const handleAddFrame = () => {
-        const newId = Math.max(...frames.map(f => f.id), 0) + 1
-        const imageUrl = selectedFile ? URL.createObjectURL(selectedFile) : '/placeholder.svg?height=200&width=200'
-        setFrames([...frames, { id: newId, ...newFrame, imageUrl }])
-        setNewFrame({ name: '', width: 1, height: 1 })
-        setSelectedFile(null)
-    }
 
-    const handleDeleteFrame = (id: number) => {
-        setFrames(frames.filter(frame => frame.id !== id))
-    }
+    // Load frames from localStorage on component mount
+    useEffect(() => {
+        const storedFrames = localStorage.getItem('frames')
+        if (storedFrames) {
+            setFrames(JSON.parse(storedFrames))
+        }
+    }, [])
+
+    // Update localStorage 
+    useEffect(() => {
+        localStorage.setItem('frames', JSON.stringify(frames))
+    }, [frames])
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files && e.target.files[0]) {
-            setSelectedFile(e.target.files[0])
+        const file = e.target.files?.[0]
+        if (file) {
+            // Validasi tipe file
+            const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg']
+            if (!allowedTypes.includes(file.type)) {
+                toast.error('Only JPEG, JPG, and PNG files are allowed', {
+                    position: 'top-right'
+                })
+                return
+            }
+
+            // Validation ( maks 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                toast.error('File size should be less than 5MB', {
+                    position: 'top-right'
+                })
+                return
+            }
+
+            const reader = new FileReader()
+            reader.onloadend = () => {
+                setSelectedFile(file)
+            }
+            reader.readAsDataURL(file)
         }
+    }
+
+    const handleAddFrame = () => {
+        // Validasi input
+        if (!newFrame.name.trim()) {
+            toast.error('Frame name cannot be empty', {
+                position: 'top-right'
+            })
+            return
+        }
+
+        if (newFrame.width <= 0 || newFrame.height <= 0) {
+            toast.error('Width and height must be greater than 0', {
+                position: 'top-right'
+            })
+            return
+        }
+
+        if (!selectedFile) {
+            toast.error('Please upload an image', {
+                position: 'top-right'
+            })
+            return
+        }
+
+        // read file base64
+        const reader = new FileReader()
+        reader.onloadend = () => {
+            const newId = Date.now()
+            const imageUrl = reader.result as string
+
+            const newFrameWithId: Frame = {
+                id: newId,
+                ...newFrame,
+                imageUrl
+            }
+
+            // Update state dan localStorage
+            const updatedFrames = [...frames, newFrameWithId]
+            setFrames(updatedFrames)
+            localStorage.setItem('frames', JSON.stringify(updatedFrames))
+
+
+            toast.success(`Frame "${newFrame.name}" added successfully`, {
+                position: 'top-right'
+            })
+
+
+            setNewFrame({ name: '', width: 1, height: 1 })
+            setSelectedFile(null)
+            setIsDialogOpen(false)
+        }
+        reader.readAsDataURL(selectedFile)
+    }
+    const confirmDeleteFrame = (frame: Frame) => {
+        setFrameToDelete(frame)
+    }
+    const handleDeleteFrame = () => {
+        if (!frameToDelete) return
+
+        const updatedFrames = frames.filter(frame => frame.id !== frameToDelete.id)
+        setFrames(updatedFrames)
+        localStorage.setItem('frames', JSON.stringify(updatedFrames))
+
+
+        toast.success(`Frame "${frameToDelete.name}" deleted successfully`, {
+            position: 'top-right'
+        })
+
+
+        setFrameToDelete(null)
     }
 
     return (
         <div className="space-y-6">
-            <Dialog>
+            <Toaster />
+
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>
                     <Button className="mb-4">
                         <Plus className="mr-2 h-4 w-4" /> Add New Frame
@@ -93,18 +190,46 @@ export default function FrameComponent() {
                                 type="file"
                                 onChange={handleFileChange}
                                 className="col-span-3"
-                                accept="image/*"
+                                accept="image/jpeg,image/png,image/jpg"
                             />
+                            {selectedFile && (
+                                <div className="col-span-4 text-sm text-gray-500 mt-2">
+                                    Selected file: {selectedFile.name}
+                                </div>
+                            )}
                         </div>
                     </div>
                     <Button onClick={handleAddFrame}>Add Frame</Button>
                 </DialogContent>
             </Dialog>
 
+            <AlertDialog
+                open={!!frameToDelete}
+                onOpenChange={() => setFrameToDelete(null)}
+            >
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Frame</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Are you sure you want to delete the frame {frameToDelete?.name}?
+                            This action cannot be undone.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel onClick={() => setFrameToDelete(null)}>
+                            Cancel
+                        </AlertDialogCancel>
+                        <AlertDialogAction onClick={handleDeleteFrame}>
+                            Delete
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {frames.map((frame) => (
                     <Card key={frame.id} className="overflow-hidden">
-                        <CardContent className="p-0">
+                        <CardContent className="p-0 ">
                             <div className="relative aspect-square">
                                 <Image
                                     src={frame.imageUrl}
@@ -123,7 +248,11 @@ export default function FrameComponent() {
                                 <Button variant="outline" size="icon">
                                     <Edit className="h-4 w-4" />
                                 </Button>
-                                <Button variant="destructive" size="icon" onClick={() => handleDeleteFrame(frame.id)}>
+                                <Button
+                                    variant="destructive"
+                                    size="icon"
+                                    onClick={() => confirmDeleteFrame(frame)}
+                                >
                                     <Trash2 className="h-4 w-4" />
                                 </Button>
                             </div>
@@ -134,4 +263,3 @@ export default function FrameComponent() {
         </div>
     )
 }
-

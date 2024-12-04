@@ -1,143 +1,58 @@
+'use client'
+
 import * as React from "react"
 import Image from "next/image"
-
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import { Button } from "../ui/button"
 import { Blend } from "lucide-react"
 import { cn } from "@/lib/utils"
+
+export interface FilterData {
+    id: number;
+    name: string;
+    adjustments: {
+        brightness: number;
+        contrast: number;
+        saturation: number;
+        whites: number;
+        blacks: number;
+        sharpness: number;
+        hue: number;
+    }
+}
 
 export interface Artwork {
     nameFilter: string
     images: string
 }
 
-export const works: Artwork[] = [
-    {
-        nameFilter: "Midnight Blue",
-        images: "https://photoshopdesire.com/wp-content/uploads/2018/10/Before-How-to-Get-Dark-and-Moody-Tones-Color-Effect-in-Photoshop.jpg",
-    },
-    {
-        nameFilter: "Starry Night",
-        images: "https://photoshopdesire.com/wp-content/uploads/2018/10/Before-How-to-Get-Dark-and-Moody-Tones-Color-Effect-in-Photoshop.jpg",
-    },
-    {
-        nameFilter: "Deep Ocean",
-        images: "https://photoshopdesire.com/wp-content/uploads/2018/10/Before-How-to-Get-Dark-and-Moody-Tones-Color-Effect-in-Photoshop.jpg",
-    },
-    {
-        nameFilter: "Cerulean Dream",
-        images: "https://photoshopdesire.com/wp-content/uploads/2018/10/Before-How-to-Get-Dark-and-Moody-Tones-Color-Effect-in-Photoshop.jpg",
-    },
-    {
-        nameFilter: "Navy Depths",
-        images: "https://photoshopdesire.com/wp-content/uploads/2018/10/Before-How-to-Get-Dark-and-Moody-Tones-Color-Effect-in-Photoshop.jpg",
-    },
-    {
-        nameFilter: "Oceanic Bliss",
-        images: "https://photoshopdesire.com/wp-content/uploads/2018/10/Before-How-to-Get-Dark-and-Moody-Tones-Color-Effect-in-Photoshop.jpg",
-    },
-    {
-        nameFilter: "Abyssal Blue",
-        images: "https://photoshopdesire.com/wp-content/uploads/2018/10/Before-How-to-Get-Dark-and-Moody-Tones-Color-Effect-in-Photoshop.jpg",
-    },
-    {
-        nameFilter: "Turquoise Tide",
-        images: "https://photoshopdesire.com/wp-content/uploads/2018/10/Before-How-to-Get-Dark-and-Moody-Tones-Color-Effect-in-Photoshop.jpg",
-    },
-    {
-        nameFilter: "Cobalt Sea",
-        images: "https://photoshopdesire.com/wp-content/uploads/2018/10/Before-How-to-Get-Dark-and-Moody-Tones-Color-Effect-in-Photoshop.jpg",
-    },
-    {
-        nameFilter: "Sapphire Waves",
-        images: "https://photoshopdesire.com/wp-content/uploads/2018/10/Before-How-to-Get-Dark-and-Moody-Tones-Color-Effect-in-Photoshop.jpg",
-    },
-    {
-        nameFilter: "Indigo Horizon",
-        images: "https://photoshopdesire.com/wp-content/uploads/2018/10/Before-How-to-Get-Dark-and-Moody-Tones-Color-Effect-in-Photoshop.jpg",
-    },
-    {
-        nameFilter: "Blue Abyss",
-        images: "https://photoshopdesire.com/wp-content/uploads/2018/10/Before-How-to-Get-Dark-and-Moody-Tones-Color-Effect-in-Photoshop.jpg",
-    },
-    {
-        nameFilter: "Azure Dream",
-        images: "https://photoshopdesire.com/wp-content/uploads/2018/10/Before-How-to-Get-Dark-and-Moody-Tones-Color-Effect-in-Photoshop.jpg",
-    },
-    {
-        nameFilter: "Electric Blue",
-        images: "https://photoshopdesire.com/wp-content/uploads/2018/10/Before-How-to-Get-Dark-and-Moody-Tones-Color-Effect-in-Photoshop.jpg",
-    },
-    {
-        nameFilter: "Glacial Blue",
-        images: "https://photoshopdesire.com/wp-content/uploads/2018/10/Before-How-to-Get-Dark-and-Moody-Tones-Color-Effect-in-Photoshop.jpg",
-    },
-    {
-        nameFilter: "Frosty Blue",
-        images: "https://photoshopdesire.com/wp-content/uploads/2018/10/Before-How-to-Get-Dark-and-Moody-Tones-Color-Effect-in-Photoshop.jpg",
-    },
-    {
-        nameFilter: "Sky Blue",
-        images: "https://photoshopdesire.com/wp-content/uploads/2018/10/Before-How-to-Get-Dark-and-Moody-Tones-Color-Effect-in-Photoshop.jpg",
-    },
-    {
-        nameFilter: "Teal Wave",
-        images: "https://photoshopdesire.com/wp-content/uploads/2018/10/Before-How-to-Get-Dark-and-Moody-Tones-Color-Effect-in-Photoshop.jpg",
-    },
-    {
-        nameFilter: "Marine Blue",
-        images: "https://photoshopdesire.com/wp-content/uploads/2018/10/Before-How-to-Get-Dark-and-Moody-Tones-Color-Effect-in-Photoshop.jpg",
-    },
-    {
-        nameFilter: "Blue Lagoon",
-        images: "https://photoshopdesire.com/wp-content/uploads/2018/10/Before-How-to-Get-Dark-and-Moody-Tones-Color-Effect-in-Photoshop.jpg",
-    },
-    {
-        nameFilter: "Blue Velvet",
-        images: "https://photoshopdesire.com/wp-content/uploads/2018/10/Before-How-to-Get-Dark-and-Moody-Tones-Color-Effect-in-Photoshop.jpg",
-    },
-    {
-        nameFilter: "Midnight Azure",
-        images: "https://photoshopdesire.com/wp-content/uploads/2018/10/Before-How-to-Get-Dark-and-Moody-Tones-Color-Effect-in-Photoshop.jpg",
-    },
-    {
-        nameFilter: "Royal Blue Horizon",
-        images: "https://photoshopdesire.com/wp-content/uploads/2018/10/Before-How-to-Get-Dark-and-Moody-Tones-Color-Effect-in-Photoshop.jpg",
-    },
-    {
-        nameFilter: "Prussian Blue",
-        images: "https://photoshopdesire.com/wp-content/uploads/2018/10/Before-How-to-Get-Dark-and-Moody-Tones-Color-Effect-in-Photoshop.jpg",
-    },
-    {
-        nameFilter: "Arctic Breeze",
-        images: "https://photoshopdesire.com/wp-content/uploads/2018/10/Before-How-to-Get-Dark-and-Moody-Tones-Color-Effect-in-Photoshop.jpg",
-    },
-    {
-        nameFilter: "Denim Blue",
-        images: "https://photoshopdesire.com/wp-content/uploads/2018/10/Before-How-to-Get-Dark-and-Moody-Tones-Color-Effect-in-Photoshop.jpg",
-    },
-    {
-        nameFilter: "Celestial Blue",
-        images: "https://photoshopdesire.com/wp-content/uploads/2018/10/Before-How-to-Get-Dark-and-Moody-Tones-Color-Effect-in-Photoshop.jpg",
-    },
-    {
-        nameFilter: "Deep Sky Blue",
-        images: "https://photoshopdesire.com/wp-content/uploads/2018/10/Before-How-to-Get-Dark-and-Moody-Tones-Color-Effect-in-Photoshop.jpg",
-    },
-    {
-        nameFilter: "Mediterranean Blue",
-        images: "https://photoshopdesire.com/wp-content/uploads/2018/10/Before-How-to-Get-Dark-and-Moody-Tones-Color-Effect-in-Photoshop.jpg",
-    },
-    {
-        nameFilter: "Ultramarine Dream",
-        images: "https://photoshopdesire.com/wp-content/uploads/2018/10/Before-How-to-Get-Dark-and-Moody-Tones-Color-Effect-in-Photoshop.jpg",
-    }
-]
-
+const DEFAULT_IMAGE = "https://photoshopdesire.com/wp-content/uploads/2018/10/Before-How-to-Get-Dark-and-Moody-Tones-Color-Effect-in-Photoshop.jpg"
 
 export function FilterTone() {
     const [isOpen, setIsOpen] = React.useState(false)
+    const [works, setWorks] = React.useState<Artwork[]>([])
     const filterRef = React.useRef<HTMLDivElement>(null)
+
+    // Load filters from localStorage on component mount
+    React.useEffect(() => {
+        const storedFilters = localStorage.getItem('filters')
+        if (storedFilters) {
+            try {
+                const parsedFilters: FilterData[] = JSON.parse(storedFilters)
+
+                // Transform stored filters to Artwork format
+                const artworkFilters: Artwork[] = parsedFilters.map(filter => ({
+                    nameFilter: filter.name,
+                    images: DEFAULT_IMAGE
+                }))
+
+                setWorks(artworkFilters)
+            } catch (error) {
+                console.error("Error parsing filters from localStorage", error)
+                setWorks([])
+            }
+        }
+    }, [])
 
     React.useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -172,7 +87,10 @@ export function FilterTone() {
                 <ScrollArea className="w-full h-28 md:h-[120px] whitespace-nowrap p-2 bg-gray-600 bg-opacity-90 backdrop-blur-sm">
                     <div className="flex w-max space-x-4 p-4">
                         {works.map((artwork) => (
-                            <figure key={artwork.nameFilter} className="shrink-0 w-20 flex flex-col items-center">
+                            <figure
+                                key={artwork.nameFilter}
+                                className="shrink-0 w-20 flex flex-col items-center"
+                            >
                                 <div className="overflow-hidden rounded-md flex justify-center">
                                     <Image
                                         src={artwork.images}
@@ -184,7 +102,7 @@ export function FilterTone() {
                                     />
                                 </div>
                                 <figcaption className="pt-2 text-[8px] md:text-xs text-white text-center 
-                    whitespace-normal break-words w-full">
+                                whitespace-normal break-words w-full">
                                     {artwork.nameFilter}
                                 </figcaption>
                             </figure>

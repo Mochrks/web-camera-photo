@@ -1,14 +1,15 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Slider } from "@/components/ui/slider"
 import { Card, CardContent } from "@/components/ui/card"
 import { Sun, Contrast, Palette, Square, Brush, CircleDot, Paintbrush } from 'lucide-react'
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog'
+import toast, { Toaster } from 'react-hot-toast'
 
 type AdjustmentType = 'brightness' | 'contrast' | 'saturation' | 'whites' | 'blacks' | 'sharpness' | 'hue'
 
@@ -29,13 +30,23 @@ type Filter = {
 }
 
 export default function FilterComponent() {
-    const [filters, setFilters] = useState<Filter[]>([
-        { id: 1, name: 'Vintage', adjustments: { brightness: 50, contrast: 60, saturation: 40, whites: 70, blacks: 30, sharpness: 80, hue: 0 } },
-        { id: 2, name: 'Sepia', adjustments: { brightness: 70, contrast: 40, saturation: 30, whites: 60, blacks: 50, sharpness: 60, hue: 30 } },
-        { id: 3, name: 'Noir', adjustments: { brightness: 30, contrast: 90, saturation: 10, whites: 80, blacks: 70, sharpness: 100, hue: 0 } },
-    ])
+    const [filters, setFilters] = useState<Filter[]>([])
     const [currentPage, setCurrentPage] = useState(1)
     const [itemsPerPage] = useState(5)
+    const [isDialogOpen, setIsDialogOpen] = useState(false)
+
+    // Load filters from localStorage on component mount
+    useEffect(() => {
+        const storedFilters = localStorage.getItem('filters')
+        if (storedFilters) {
+            setFilters(JSON.parse(storedFilters))
+        }
+    }, [])
+
+
+    useEffect(() => {
+        localStorage.setItem('filters', JSON.stringify(filters))
+    }, [filters])
 
     const indexOfLastItem = currentPage * itemsPerPage
     const indexOfFirstItem = indexOfLastItem - itemsPerPage
@@ -61,7 +72,31 @@ export default function FilterComponent() {
     })
 
     const handleAddFilter = () => {
-        setFilters([...filters, { ...newFilter, id: filters.length + 1 }])
+        // validation
+        if (!newFilter.name.trim()) {
+            toast.error('Filter name cannot be empty', {
+                position: 'top-right'
+            })
+            return
+        }
+
+
+        const newFilterWithId = {
+            ...newFilter,
+            id: Date.now()
+        }
+
+        // Update state dan localStorage
+        const updatedFilters = [...filters, newFilterWithId]
+        setFilters(updatedFilters)
+        localStorage.setItem('filters', JSON.stringify(updatedFilters))
+
+
+        toast.success(`Filter "${newFilter.name}" added successfully`, {
+            position: 'top-right'
+        })
+
+        // Reset form
         setNewFilter({
             id: 0,
             name: '',
@@ -75,15 +110,26 @@ export default function FilterComponent() {
                 hue: 0
             }
         })
+        setIsDialogOpen(false)
     }
 
-    const handleDeleteFilter = (id: number) => {
-        setFilters(filters.filter(filter => filter.id !== id))
+    const handleDeleteFilter = (id: number, name: string) => {
+        const updatedFilters = filters.filter(filter => filter.id !== id)
+        setFilters(updatedFilters)
+        localStorage.setItem('filters', JSON.stringify(updatedFilters))
+
+
+        toast.success(`Filter "${name}" deleted successfully`, {
+            position: 'top-right'
+        })
     }
 
     return (
         <div className="space-y-6">
-            <Dialog>
+
+            <Toaster />
+
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>
                     <Button className="mb-4">Add New Filter</Button>
                 </DialogTrigger>
@@ -155,7 +201,23 @@ export default function FilterComponent() {
                             </div>
                             <div className="mt-4 flex justify-end space-x-2">
                                 <Button variant="outline" size="sm">Edit</Button>
-                                <Button variant="destructive" size="sm" onClick={() => handleDeleteFilter(filter.id)}>Delete</Button>
+                                <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                        <Button variant="destructive" size="sm">Delete</Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>Delete Filter</AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                                Are you sure you want to delete the filter {filter.name}? This action cannot be undone.
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                            <AlertDialogAction onClick={() => handleDeleteFilter(filter.id, filter.name)}>Delete</AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
                             </div>
                         </CardContent>
                     </Card>
@@ -178,4 +240,3 @@ export default function FilterComponent() {
         </div>
     )
 }
-

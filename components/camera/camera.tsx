@@ -106,7 +106,7 @@ const Camera: FC<CameraProps> = ({ onClosed, onCapturedImages, requiredPhotos })
             {/* filters */}
             <FilterTone />
             {/* adjustment */}
-            <AdjustmentPanel />
+            {/* <AdjustmentPanel /> */}
             {/* timer */}
             <Select
               value={timerActive ? timerDuration.toString() : "off"}
@@ -149,9 +149,6 @@ const Camera: FC<CameraProps> = ({ onClosed, onCapturedImages, requiredPhotos })
             </Button>
           </div>
         </div>
-
-
-
 
         <CameraView ref={camera} />
 
