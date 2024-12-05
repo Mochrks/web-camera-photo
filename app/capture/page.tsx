@@ -67,7 +67,7 @@ export default function PhotoBooth() {
 
 
     return (
-        <BackgroundLines className="flex min-h-screen flex-col items-center justify-center">
+        <BackgroundLines className="flex min-h-screen flex-col items-center justify-center overflow-hidden">
             <div className='z-50'>
                 {!selectedLayout && !showCamera && !finalImage && (
                     <LayoutSelector onSelect={handleLayoutSelect} />

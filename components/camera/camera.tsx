@@ -201,9 +201,8 @@ function SwitchCamera() {
   if (devices.length === 2) {
     return (
       <Button
-        variant="default"
+        className="flex items-center justify-center w-16 h-10 p-2 bg-gray-800 text-white hover:bg-gray-700 transition duration-200"
         size="icon"
-        className="w-16 h-10 bg-gray-800 text-white hover:bg-gray-700"
         onClick={switchCamera}
       >
         <ArrowLeftRight className="fixed h-6 w-6" />
@@ -215,9 +214,8 @@ function SwitchCamera() {
     <Dialog>
       <DialogTrigger asChild>
         <Button
-          variant={"default"}
-          size={"icon"}
-          className="w-16 h-10 bg-gray-800 text-white hover:bg-gray-700"
+          className="flex items-center justify-center w-16 h-10 p-2 bg-gray-800 text-white hover:bg-gray-700 transition duration-200"
+          size="icon"
         >
           <ArrowLeftRight className="fixed h-6 w-6" />
           <span className="sr-only">Switch camera</span>

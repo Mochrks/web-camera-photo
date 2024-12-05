@@ -30,15 +30,26 @@ export default function ColorPicker({ color, onChange }: ColorPickerProps) {
         <div className="flex flex-col space-y-4">
             <div className="w-64 h-32 rounded-lg shadow-inner" style={{ backgroundColor: color }}></div>
             <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">Hue</label>
+                <label className="block text-sm font-medium text-gray-700">Colors</label>
                 <input
                     type="range"
                     min="0"
                     max="360"
                     value={hue}
                     onChange={(e) => setHue(Number(e.target.value))}
-                    className="w-full h-2 bg-gradient-to-r from-red-600 via-yellow-600 via-green-400 via-blue-500 to-purple-500 rounded-lg appearance-none cursor-pointer"
+                    className="w-full h-2 rounded-lg appearance-none cursor-pointer"
+                    style={{
+                        background: `linear-gradient(to right, 
+                                        rgb(255, 0, 0), 
+                                        rgb(255, 255, 0), 
+                                        rgb(0, 255, 0), 
+                                        rgb(0, 255, 255), 
+                                        rgb(0, 0, 255), 
+                                        rgb(255, 0, 255), 
+                                        rgb(255, 0, 0))`,
+                    }}
                 />
+
             </div>
             <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700">Saturation</label>
