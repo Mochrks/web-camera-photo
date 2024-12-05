@@ -4,18 +4,10 @@ import { drawText, drawImage, drawFrame } from '../../utils/canvas-utils';
 interface LayoutProps {
     images: string[];
     onSave: (dataUrl: string) => void;
+    backgroundColor?: string;
 }
 
-const useAutoSave = (canvasRef: React.RefObject<HTMLCanvasElement>, onSave: (dataUrl: string) => void) => {
-    useEffect(() => {
-        if (canvasRef.current) {
-            const dataUrl = canvasRef.current.toDataURL('image/jpeg');
-            onSave(dataUrl);
-        }
-    }, [canvasRef, onSave]);
-};
-
-const Layout1: React.FC<LayoutProps> = ({ images, onSave }) => {
+const Layout1: React.FC<LayoutProps> = ({ images, onSave, backgroundColor = '#FF5733' }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     useEffect(() => {
@@ -29,8 +21,8 @@ const Layout1: React.FC<LayoutProps> = ({ images, onSave }) => {
 
             // Background
             const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-            gradient.addColorStop(0, '#4a00e0');
-            gradient.addColorStop(1, '#8e2de2');
+            gradient.addColorStop(0, backgroundColor);
+            gradient.addColorStop(1, backgroundColor);
             ctx.fillStyle = gradient;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -60,12 +52,12 @@ const Layout1: React.FC<LayoutProps> = ({ images, onSave }) => {
 
             loadAndDrawImages();
         }
-    }, [images, onSave]);
+    }, [images, onSave, backgroundColor]);
 
     return <canvas ref={canvasRef} style={{ maxWidth: '100%', height: 'auto' }} />;
 };
 
-const Layout2: React.FC<LayoutProps> = ({ images, onSave }) => {
+const Layout2: React.FC<LayoutProps> = ({ images, onSave, backgroundColor = '#ff9a9e' }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     useEffect(() => {
@@ -86,7 +78,7 @@ const Layout2: React.FC<LayoutProps> = ({ images, onSave }) => {
             patternCanvas.height = 20;
 
             // Draw a simple pattern
-            patternCtx.fillStyle = '#ff9a9e';
+            patternCtx.fillStyle = backgroundColor;
             patternCtx.fillRect(0, 0, 20, 20);
             patternCtx.fillStyle = '#fad0c4';
             patternCtx.fillRect(0, 0, 10, 10);
@@ -137,7 +129,7 @@ const Layout2: React.FC<LayoutProps> = ({ images, onSave }) => {
 
             loadAndDrawImages();
         }
-    }, [images, onSave]);
+    }, [images, onSave, backgroundColor]);
 
     // Function to draw image with rounded corners
     const drawRoundedImage = (ctx: CanvasRenderingContext2D, imgSrc: string, x: number, y: number, width: number, height: number, radius: number) => {
@@ -166,7 +158,7 @@ const Layout2: React.FC<LayoutProps> = ({ images, onSave }) => {
     return <canvas ref={canvasRef} style={{ maxWidth: '100%', height: 'auto' }} />;
 };
 
-const Layout3: React.FC<LayoutProps> = ({ images, onSave }) => {
+const Layout3: React.FC<LayoutProps> = ({ images, onSave, backgroundColor = '#000' }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     useEffect(() => {
@@ -179,7 +171,7 @@ const Layout3: React.FC<LayoutProps> = ({ images, onSave }) => {
             canvas.height = 850;
 
             // Background
-            ctx.fillStyle = '#000';
+            ctx.fillStyle = backgroundColor;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             // Title
@@ -218,13 +210,13 @@ const Layout3: React.FC<LayoutProps> = ({ images, onSave }) => {
 
             loadAndDrawImages();
         }
-    }, [images, onSave]);
+    }, [images, onSave, backgroundColor]);
 
     return <canvas ref={canvasRef} style={{ maxWidth: '100%', height: 'auto' }} />;
 };
 
 
-const Layout4: React.FC<LayoutProps> = ({ images, onSave }) => {
+const Layout4: React.FC<LayoutProps> = ({ images, onSave, backgroundColor = '#000' }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     useEffect(() => {
@@ -329,13 +321,13 @@ const Layout4: React.FC<LayoutProps> = ({ images, onSave }) => {
 
             drawPhotos();
         }
-    }, [images, onSave]);
+    }, [images, onSave, backgroundColor]);
 
     return <canvas ref={canvasRef} style={{ maxWidth: '100%', height: 'auto' }} />;
 };
 
 
-const Layout5: React.FC<LayoutProps> = ({ images, onSave }) => {
+const Layout5: React.FC<LayoutProps> = ({ images, onSave, backgroundColor = '#000' }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     useEffect(() => {
@@ -476,12 +468,12 @@ const Layout5: React.FC<LayoutProps> = ({ images, onSave }) => {
 
             drawPhotos();
         }
-    }, [images, onSave]);
+    }, [images, onSave, backgroundColor]);
 
     return <canvas ref={canvasRef} style={{ maxWidth: '100%', height: 'auto' }} />;
 };
 
-const Layout6: React.FC<LayoutProps> = ({ images, onSave }) => {
+const Layout6: React.FC<LayoutProps> = ({ images, onSave, backgroundColor = '#000' }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     useEffect(() => {
@@ -586,7 +578,7 @@ const Layout6: React.FC<LayoutProps> = ({ images, onSave }) => {
 
             drawPhotos();
         }
-    }, [images, onSave]);
+    }, [images, onSave, backgroundColor]);
 
     return <canvas ref={canvasRef} style={{ maxWidth: '100%', height: 'auto' }} />;
 };

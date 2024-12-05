@@ -66,7 +66,7 @@ export default function Home() {
 
   const LoadingComponent = () => {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
         <div className="flex flex-col items-center justify-center space-y-4">
           <div className="animate-spin">
             <svg
@@ -111,7 +111,7 @@ export default function Home() {
 
       <div className="container min-h-screen">
         <PromoCarousel />
-        <div className="flex flex-col items-center justify-center  pt-20">
+        <div className="flex flex-col items-center justify-center p-20">
           <div className="text-center">
             <div className="container">
               <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-4xl py-10">
@@ -123,7 +123,7 @@ export default function Home() {
                   <CardDescription>Please scan before !!</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex items-center justify-center py-5">
+                  <div className="flex items-center justify-center p-5">
                     <QrCodeIcon className="w-14 h-14 text-black" />
                   </div>
                   <div className="flex items-center justify-center">
