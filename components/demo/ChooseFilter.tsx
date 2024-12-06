@@ -75,7 +75,7 @@ export const ChooseFilter = () => {
         <div>
             <div className="flex flex-col w-full z-50">
                 <h5 className="text-center text-black text-md font-bold">Filters</h5>
-                <ScrollArea className="w-full h-40 md:h-[520px] whitespace-nowrap mt-4">
+                <ScrollArea className="w-full h-40 md:h-[300px] whitespace-nowrap mt-1">
                     <div className="flex flex-col w-max bg-gray-600">
                         {works.map((artwork) => (
                             <figure

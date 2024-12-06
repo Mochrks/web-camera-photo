@@ -75,9 +75,7 @@ export default function PhotoBooth() {
 
             <div className='z-50 '>
                 {!selectedLayout && !showCamera && !finalImage && (
-
                     <LayoutSelector onSelect={handleLayoutSelect} />
-
                 )}
                 {showCamera && (
                     <div className="h-svh w-svw max-w-full p-0">
