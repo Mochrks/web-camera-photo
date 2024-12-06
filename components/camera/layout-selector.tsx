@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button'
 import { BackgroundGradient } from '../ui/background-gradient';
 import { TextGenerateEffect } from '../ui/text-generate-effect';
 import { Vortex } from '../ui/vortex';
+import { NeonGradientCard } from '../ui/neon-gradient-card';
 
 interface LayoutSelectorProps {
     onSelect: (layout: number) => void
@@ -80,25 +81,27 @@ const LayoutSelector: React.FC<LayoutSelectorProps> = ({ onSelect }) => {
         }
     ];
 
-    const words = `Select Your Layout`;
+    const words = `Choose Your Layout`;
     return (
         <Vortex className='w-full h-full flex flex-col gap-5'>
             <div className='flex justify-center p-5'>
                 <TextGenerateEffect words={words} />
             </div>
-            <BackgroundGradient className="grid grid-cols-1 gap-6 md:grid-cols-3 max-w-4xl w-full rounded-xl p-5">
-                {layouts.map((layout) => (
-                    <Button
-                        key={layout.id}
-                        onClick={() => onSelect(layout.id)}
-                        className="px-2 h-90 text-lg font-semibold flex flex-col items-center justify-center gap-2"
-                        variant="outline"
-                    >
-                        <div className="font-semibold">{layout.name}</div>
-                        {layout.skeleton}
-                    </Button>
-                ))}
-            </BackgroundGradient>
+            <NeonGradientCard>
+                <BackgroundGradient className="grid grid-cols-1 gap-6 md:grid-cols-3 max-w-4xl w-full rounded-xl p-10">
+                    {layouts.map((layout) => (
+                        <Button
+                            key={layout.id}
+                            onClick={() => onSelect(layout.id)}
+                            className="px-2 h-90 text-lg font-semibold flex flex-col items-center justify-center gap-2"
+                            variant="outline"
+                        >
+                            <div className="font-semibold">{layout.name}</div>
+                            {layout.skeleton}
+                        </Button>
+                    ))}
+                </BackgroundGradient>
+            </NeonGradientCard>
         </Vortex>
     )
 }

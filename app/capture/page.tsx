@@ -10,9 +10,11 @@ import Confetti from "../../components/ui/confetti"
 import { Download, Play, PrinterCheck } from 'lucide-react';
 import ColorPickerCTA from '@/components/demo/ColorPickerCTA'
 import { BackgroundLines } from '@/components/ui/background-lines'
-import { Vortex } from '@/components/ui/vortex'
-import { ChooseFilter } from '@/components/demo/ChooseFilter'
 import ChooseFilterCTA from '@/components/demo/ChooseFilterCTA'
+import { BackgroundGradientAnimation } from '@/components/ui/background-gradient-animation'
+import { NeonGradientCard } from '@/components/ui/neon-gradient-card'
+
+
 
 export default function PhotoBooth() {
     const [selectedLayout, setSelectedLayout] = useState<number | null>(null)
@@ -70,9 +72,12 @@ export default function PhotoBooth() {
 
     return (
         <BackgroundLines className="flex min-h-screen flex-col items-center justify-center overflow-hidden">
-            <div className='z-50'>
+
+            <div className='z-50 '>
                 {!selectedLayout && !showCamera && !finalImage && (
+
                     <LayoutSelector onSelect={handleLayoutSelect} />
+
                 )}
                 {showCamera && (
                     <div className="h-svh w-svw max-w-full p-0">
@@ -95,7 +100,7 @@ export default function PhotoBooth() {
                     </div>
                 )}
                 {finalImage && (
-                    <div className="flex flex-col items-center p-5 bg-white rounded-xl m-20 ">
+                    <div className="flex flex-col items-center p-5 bg-white rounded-xl m-20  ">
                         <div className='z-50'>
                             <ChooseFilterCTA />
                             <ColorPickerCTA onColorChange={handleColorChange} />
@@ -148,6 +153,7 @@ export default function PhotoBooth() {
                             }}
                         />
                     </div>
+
                 )
                 }
             </div>
