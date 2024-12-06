@@ -11,6 +11,8 @@ import { Download, Play, PrinterCheck } from 'lucide-react';
 import ColorPickerCTA from '@/components/demo/ColorPickerCTA'
 import { BackgroundLines } from '@/components/ui/background-lines'
 import { Vortex } from '@/components/ui/vortex'
+import { ChooseFilter } from '@/components/demo/ChooseFilter'
+import ChooseFilterCTA from '@/components/demo/ChooseFilterCTA'
 
 export default function PhotoBooth() {
     const [selectedLayout, setSelectedLayout] = useState<number | null>(null)
@@ -44,7 +46,7 @@ export default function PhotoBooth() {
     }
 
     const handleColorChange = (color: string) => {
-        // Hanya ubah warna setelah pengguna memilih warna baru
+
         if (selectedColor !== color) {
             setSelectedColor(color);
             console.log('Color in parent:', color);
@@ -95,6 +97,7 @@ export default function PhotoBooth() {
                 {finalImage && (
                     <div className="flex flex-col items-center p-5 bg-white rounded-xl m-20 ">
                         <div className='z-50'>
+                            <ChooseFilterCTA />
                             <ColorPickerCTA onColorChange={handleColorChange} />
                         </div>
                         <div className='border border-gray-600 p-3 m-5'>

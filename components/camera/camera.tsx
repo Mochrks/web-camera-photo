@@ -103,10 +103,13 @@ const Camera: FC<CameraProps> = ({ onClosed, onCapturedImages, requiredPhotos })
             <span className="sr-only">Close camera</span>
           </Button>
           <div className="flex space-x-2">
+
             {/* filters */}
-            <FilterTone />
+            {/* <FilterTone /> */}
+
             {/* adjustment */}
             {/* <AdjustmentPanel /> */}
+
             {/* timer */}
             <Select
               value={timerActive ? timerDuration.toString() : "off"}
@@ -129,6 +132,7 @@ const Camera: FC<CameraProps> = ({ onClosed, onCapturedImages, requiredPhotos })
                 <SelectItem value="10">10s</SelectItem>
               </SelectContent>
             </Select>
+
             {/* grid */}
             <Button
               className={cn(
@@ -147,6 +151,7 @@ const Camera: FC<CameraProps> = ({ onClosed, onCapturedImages, requiredPhotos })
               </svg>
               <span className="sr-only">Toggle grid</span>
             </Button>
+
           </div>
         </div>
 

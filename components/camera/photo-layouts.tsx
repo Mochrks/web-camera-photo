@@ -7,6 +7,7 @@ interface LayoutProps {
     backgroundColor?: string;
 }
 
+
 const Layout1: React.FC<LayoutProps> = ({ images, onSave, backgroundColor = '#FF5733' }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -188,15 +189,66 @@ const Layout3: React.FC<LayoutProps> = ({ images, onSave, backgroundColor = '#00
 
             const loadAndDrawImages = async () => {
                 const positions = [
-                    { x: 50, y: 100, width: 310, height: 200, rotation: -0.1 },
-                    { x: 230, y: 320, width: 310, height: 200, rotation: 0.1 },
-                    { x: 100, y: 550, width: 310, height: 200, rotation: -0.05 },
+                    {
+                        x: 50,
+                        y: 100,
+                        width: 310,
+                        height: 200,
+                        rotation: -0.1,
+                        filters: {
+                            brightness: 120,     // 120%
+                            contrast: 110,        // 110%
+                            saturation: 120,      // 120%
+                            white: 90,            // 90%
+                            black: 10,            // 10%
+                            sepia: 20,            // 20%
+                            hue: 10,              // 10 %
+                            sharpness: 10         // 50%
+                        }
+                    },
+                    {
+                        x: 230,
+                        y: 320,
+                        width: 310,
+                        height: 200,
+                        rotation: 0.1,
+                        filters: {
+                            brightness: 90,       // 90%
+                            contrast: 120,        // 120%
+                            saturation: 80,       // 80%
+                            sepia: 30,            // 30%
+                            hue: -20,             // -20 %
+                        }
+                    },
+                    {
+                        x: 100,
+                        y: 550,
+                        width: 310,
+                        height: 200,
+                        rotation: -0.05,
+                        filters: {
+                            brightness: 100,      // 100%
+                            white: 95,            // 95%
+                            black: 5,             // 5%
+                            sharpness: 4         // 70%
+                        }
+                    },
                 ];
 
+
                 for (let i = 0; i < 3; i++) {
-                    const { x, y, width, height, rotation } = positions[i];
+                    const { x, y, width, height, rotation, filters } = positions[i];
                     drawPolaroidFrame(x, y, width, height, rotation);
-                    await drawImage(ctx, images[i], x, y, width, height, rotation);
+                    await drawImage(
+                        ctx,
+                        images[i],
+                        x,
+                        y,
+                        width,
+                        height,
+                        rotation,
+                        filters  // Add to filter
+                    );
                 }
 
                 // Add decorative elements
@@ -584,6 +636,5 @@ const Layout6: React.FC<LayoutProps> = ({ images, onSave, backgroundColor = '#00
 };
 
 export {
-    Layout1, Layout2, Layout3, Layout4, Layout5,
-    Layout6,
+    Layout1, Layout2, Layout3, Layout4, Layout5, Layout6,
 };
