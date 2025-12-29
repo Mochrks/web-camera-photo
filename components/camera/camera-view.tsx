@@ -3,13 +3,10 @@
 import React, { useEffect, useImperativeHandle, useState } from "react";
 import { useCamera } from "@/components/camera/camera-provider";
 import { CameraProps, defaultErrorMessages } from "./camera-types";
-import { TriangleAlert, X } from 'lucide-react';
+import { TriangleAlert, X } from "lucide-react";
 
 export const CameraView = React.forwardRef<unknown, CameraProps>(
-  (
-    { errorMessages = defaultErrorMessages, videoReadyCallback = () => null },
-    ref,
-  ) => {
+  ({ errorMessages = defaultErrorMessages, videoReadyCallback = () => null }, ref) => {
     const {
       playerRef,
       canvasRef,
@@ -32,22 +29,14 @@ export const CameraView = React.forwardRef<unknown, CameraProps>(
         await initCameraStream();
       }
       init();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [activeDeviceId]);
 
     return (
-      <div
-        ref={containerRef}
-        className="min-h-[calc(100vh_-_theme(spacing.16))] bg-muted"
-      >
+      <div ref={containerRef} className="min-h-[calc(100vh_-_theme(spacing.16))] bg-muted">
         <div className="absolute left-0 top-0 h-svh w-full">
-          <WarningMessage
-            message={errorMessages.noCameraAccessible!}
-            show={notSupported}
-          />
-          <WarningMessage
-            message={errorMessages.permissionDenied!}
-            show={permissionDenied}
-          />
+          <WarningMessage message={errorMessages.noCameraAccessible!} show={notSupported} />
+          <WarningMessage message={errorMessages.permissionDenied!} show={permissionDenied} />
           <video
             className={"z-0 h-svh w-full transform object-cover"}
             ref={playerRef}
@@ -61,7 +50,7 @@ export const CameraView = React.forwardRef<unknown, CameraProps>(
         </div>
       </div>
     );
-  },
+  }
 );
 
 CameraView.displayName = "CameraView";
@@ -72,15 +61,10 @@ function WarningMessage({ message, show }: { message: string; show: boolean }) {
     <div className="rounded-md bg-yellow-50 p-4">
       <div className="flex">
         <div className="flex-shrink-0">
-          <TriangleAlert
-            className="h-5 w-5 text-yellow-400"
-            aria-hidden="true"
-          />
+          <TriangleAlert className="h-5 w-5 text-yellow-400" aria-hidden="true" />
         </div>
         <div className="ml-3">
-          <h3 className="text-sm font-medium text-yellow-800">
-            Attention needed
-          </h3>
+          <h3 className="text-sm font-medium text-yellow-800">Attention needed</h3>
           <div className="mt-2 text-sm text-yellow-700">
             <p>{message}</p>
           </div>
@@ -101,4 +85,3 @@ function WarningMessage({ message, show }: { message: string; show: boolean }) {
     </div>
   ) : null;
 }
-

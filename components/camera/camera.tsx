@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeftRight, Images, X } from 'lucide-react';
+import { ArrowLeftRight, Images, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CameraView } from "./camera-view";
 import { FC, useRef, useState, useEffect } from "react";
@@ -22,14 +22,14 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { ScrollArea } from '../ui/scroll-area';
-import { FilterTone } from './filter-tone';
-import { AdjustmentPanel } from './adjustment-panel';
+import { ScrollArea } from "../ui/scroll-area";
+import { FilterTone } from "./filter-tone";
+import { AdjustmentPanel } from "./adjustment-panel";
 
 interface CameraProps {
   onClosed: () => void;
   onCapturedImages: (images: string[]) => void;
-  requiredPhotos: number
+  requiredPhotos: number;
 }
 
 const Camera: FC<CameraProps> = ({ onClosed, onCapturedImages, requiredPhotos }) => {
@@ -53,6 +53,7 @@ const Camera: FC<CameraProps> = ({ onClosed, onCapturedImages, requiredPhotos })
       }, 1000);
     }
     return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timerCount]);
 
   const handleCapture = () => {
@@ -61,7 +62,7 @@ const Camera: FC<CameraProps> = ({ onClosed, onCapturedImages, requiredPhotos })
     } else {
       capturePhoto();
     }
-  }
+  };
 
   const capturePhoto = () => {
     if (camera.current) {
@@ -70,7 +71,7 @@ const Camera: FC<CameraProps> = ({ onClosed, onCapturedImages, requiredPhotos })
         const imageData = camera.current?.takePhoto();
         if (imageData) {
           addImage(imageData);
-          setPhotoCount(prev => {
+          setPhotoCount((prev) => {
             const newCount = prev + 1;
             if (newCount === requiredPhotos) {
               onCapturedImages([...images, imageData]);
@@ -87,7 +88,7 @@ const Camera: FC<CameraProps> = ({ onClosed, onCapturedImages, requiredPhotos })
     stopStream();
     onClosed();
     window.location.reload();
-  }
+  };
 
   return (
     <div className="z-10 flex min-h-screen w-full flex-col bg-black">
@@ -103,7 +104,6 @@ const Camera: FC<CameraProps> = ({ onClosed, onCapturedImages, requiredPhotos })
             <span className="sr-only">Close camera</span>
           </Button>
           <div className="flex space-x-2">
-
             {/* filters */}
             {/* <FilterTone /> */}
 
@@ -142,7 +142,17 @@ const Camera: FC<CameraProps> = ({ onClosed, onCapturedImages, requiredPhotos })
               size="icon"
               onClick={() => setShowGrid(!showGrid)}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
                 <line x1="3" y1="9" x2="21" y2="9"></line>
                 <line x1="3" y1="15" x2="21" y2="15"></line>
@@ -151,7 +161,6 @@ const Camera: FC<CameraProps> = ({ onClosed, onCapturedImages, requiredPhotos })
               </svg>
               <span className="sr-only">Toggle grid</span>
             </Button>
-
           </div>
         </div>
 
@@ -192,16 +201,14 @@ const Camera: FC<CameraProps> = ({ onClosed, onCapturedImages, requiredPhotos })
           </div>
         )}
 
-        {showFlash && (
-          <div className="absolute inset-0 bg-white animate-flash"></div>
-        )}
+        {showFlash && <div className="absolute inset-0 bg-white animate-flash"></div>}
       </div>
     </div>
   );
 };
 
 function SwitchCamera() {
-  const { devices, setActiveDeviceId, activeDeviceId, switchCamera } = useCamera();
+  const { devices, setActiveDeviceId, switchCamera } = useCamera();
 
   if (devices.length === 2) {
     return (
@@ -264,11 +271,7 @@ function Gallery() {
           size="icon"
         >
           <Images className="h-6 w-6" />
-          {images.length > 0 && (
-            <span className="ml-0 text-sm">
-              ({images.length})
-            </span>
-          )}
+          {images.length > 0 && <span className="ml-0 text-sm">({images.length})</span>}
           <span className="sr-only">View gallery</span>
         </Button>
       </DialogTrigger>
@@ -280,7 +283,11 @@ function Gallery() {
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 p-4">
             {images.map((image, index) => (
               <div key={index} className="relative aspect-square">
-                <img src={image} alt={`captured ${index + 1}`} className="w-full h-full object-cover rounded-lg" />
+                <img
+                  src={image}
+                  alt={`captured ${index + 1}`}
+                  className="w-full h-full object-cover rounded-lg"
+                />
                 <Button
                   className="absolute right-2 top-2 h-8 w-8 rounded-full bg-red-500 hover:bg-red-600 p-1"
                   size="icon"
@@ -299,4 +306,3 @@ function Gallery() {
 }
 
 export default Camera;
-
