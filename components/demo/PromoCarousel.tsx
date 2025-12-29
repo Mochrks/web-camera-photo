@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
 import Image from 'next/image'
 
 interface Promo {
@@ -47,7 +46,7 @@ export default function PromoCarousel() {
             const interval = setInterval(nextSlide, 5000)
             return () => clearInterval(interval)
         }
-    }, [promos])
+    }, [])
 
     if (promos.length === 0) {
         return (

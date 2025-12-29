@@ -1,18 +1,16 @@
 "use client"
 
 import { useEffect, useRef, useState } from 'react'
-import LayoutSelector from '../../components/camera/layout-selector'
-import Camera from '../../components/camera/camera'
-import { Layout1, Layout2, Layout3, Layout4, Layout5, Layout6, } from '../../components/camera/photo-layouts'
+import LayoutSelector from '@/components/camera/layout-selector'
+import Camera from '@/components/camera/camera'
+import { Layout1, Layout2, Layout3, Layout4, Layout5, Layout6, } from '@/components/camera/photo-layouts'
 import { Button } from '@/components/ui/button'
-import type { ConfettiRef } from "../../components/ui/confetti";
-import Confetti from "../../components/ui/confetti"
-import { Download, Play, PrinterCheck } from 'lucide-react';
+import type { ConfettiRef } from "@/components/ui/confetti";
+import Confetti from "@/components/ui/confetti"
+import { Download, Play } from 'lucide-react';
 import ColorPickerCTA from '@/components/demo/ColorPickerCTA'
 import { BackgroundLines } from '@/components/ui/background-lines'
 import ChooseFilterCTA from '@/components/demo/ChooseFilterCTA'
-import { BackgroundGradientAnimation } from '@/components/ui/background-gradient-animation'
-import { NeonGradientCard } from '@/components/ui/neon-gradient-card'
 
 
 
@@ -64,10 +62,9 @@ export default function PhotoBooth() {
 
     useEffect(() => {
         if (isColorChanged && capturedImages.length === 3 && finalImage) {
-
             setFinalImage(null)
         }
-    }, [selectedColor, isColorChanged])
+    }, [isColorChanged, capturedImages, finalImage])
 
 
     return (
