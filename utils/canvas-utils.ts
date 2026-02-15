@@ -46,21 +46,36 @@ export const drawImage = async (
       tempCanvas.width = width;
       tempCanvas.height = height;
 
+      // Calculate source crop to simulate object-cover
+      const imgRatio = image.width / image.height;
+      const targetRatio = width / height;
+
+      let sX, sY, sW, sH;
+      if (imgRatio > targetRatio) {
+        // Image is wider than target
+        sH = image.height;
+        sW = image.height * targetRatio;
+        sX = (image.width - sW) / 2;
+        sY = 0;
+      } else {
+        // Image is taller than target
+        sW = image.width;
+        sH = image.width / targetRatio;
+        sX = 0;
+        sY = (image.height - sH) / 2;
+      }
+
       let filterString = "";
-
       if (filters.brightness !== undefined) filterString += `brightness(${filters.brightness}%) `;
-
       if (filters.contrast !== undefined) filterString += `contrast(${filters.contrast}%) `;
-
       if (filters.saturation !== undefined) filterString += `saturate(${filters.saturation}%) `;
-
       if (filters.sepia !== undefined) filterString += `sepia(${filters.sepia}%) `;
-
       if (filters.hue !== undefined) filterString += `hue-rotate(${filters.hue}deg) `;
 
       tempCtx.filter = filterString;
 
-      tempCtx.drawImage(image, 0, 0, width, height);
+      // Draw with crop (object-cover logic)
+      tempCtx.drawImage(image, sX, sY, sW, sH, 0, 0, width, height);
 
       if (
         filters.white !== undefined ||

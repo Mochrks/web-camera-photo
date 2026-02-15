@@ -1,640 +1,568 @@
-import React, { useEffect, useRef } from 'react';
-import { drawText, drawImage, drawFrame } from '../../utils/canvas-utils';
+import React, { useEffect, useRef } from "react";
+import { drawText, drawImage, drawFrame } from "../../utils/canvas-utils";
 
 interface LayoutProps {
-    images: string[];
-    onSave: (dataUrl: string) => void;
-    backgroundColor?: string;
+  images: string[];
+  onSave: (dataUrl: string) => void;
+  backgroundColor?: string;
 }
 
+// Helper for complex gradients
+const applyGradient = (
+  ctx: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+  colors: string[]
+) => {
+  const grad = ctx.createLinearGradient(0, 0, width, height);
+  colors.forEach((color, i) => grad.addColorStop(i / (colors.length - 1), color));
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, width, height);
+};
 
-const Layout1: React.FC<LayoutProps> = ({ images, onSave, backgroundColor = '#FF5733' }) => {
-    const canvasRef = useRef<HTMLCanvasElement>(null);
+// Generic Layout Wrapper to reduce boilerplate
+const BaseLayout: React.FC<
+  LayoutProps & {
+    id: number;
+    width: number;
+    height: number;
+    draw: (ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) => Promise<void>;
+  }
+> = ({ images, onSave, backgroundColor = "#000", width, height, draw }) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
-    useEffect(() => {
-        if (canvasRef.current && images.length >= 3) {
-            const canvas = canvasRef.current;
-            const ctx = canvas.getContext('2d');
-            if (!ctx) return;
+  useEffect(() => {
+    if (canvasRef.current && images.length > 0) {
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
 
-            canvas.width = 600;
-            canvas.height = 900;
+      canvas.width = width;
+      canvas.height = height;
 
-            // Background
-            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-            gradient.addColorStop(0, backgroundColor);
-            gradient.addColorStop(1, backgroundColor);
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+      const render = async () => {
+        await draw(ctx, canvas);
+        onSave(canvas.toDataURL("image/jpeg", 0.95));
+      };
+      render();
+    }
+  }, [images, onSave, backgroundColor, width, height, draw]);
 
-            // Title
-            drawText(ctx, 'Photo Booth Memories', canvas.width / 2, 60, 'bold 40px Poppins', '#fff');
+  return (
+    <canvas
+      ref={canvasRef}
+      className="max-w-full h-auto rounded-xl shadow-2xl mx-auto"
+      style={{ maxHeight: "70vh", objectFit: "contain" }}
+    />
+  );
+};
 
-            const loadAndDrawImages = async () => {
-                for (let i = 0; i < 3; i++) {
-                    const x = 50;
-                    const y = 100 + i * 260;
-                    const width = 500;
-                    const height = 230;
+// 1. Classic Vertical (3)
+export const Layout1: React.FC<LayoutProps> = (props) => (
+  <BaseLayout
+    {...props}
+    id={1}
+    width={600}
+    height={900}
+    draw={async (ctx, canvas) => {
+      ctx.fillStyle = props.backgroundColor || "#FF5733";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      drawText(ctx, "PHOTO BOOTH", canvas.width / 2, 60, "bold 40px Arial", "#fff");
+      for (let i = 0; i < 3; i++) {
+        const y = 100 + i * 260;
+        drawFrame(ctx, 45, y - 5, 510, 240, "#fff", 10);
+        await drawImage(ctx, props.images[i], 50, y, 500, 230);
+      }
+      drawText(ctx, new Date().toLocaleDateString(), 60, 860, "20px Arial", "#fff", "left");
+    }}
+  />
+);
 
-                    drawFrame(ctx, x - 5, y - 5, width + 10, height + 10, '#fff', 10);
-                    drawFrame(ctx, x - 10, y - 10, width + 20, height + 20, '#ffd700', 5);
-                    await drawImage(ctx, images[i], x, y, width, height);
-                }
-
-                // Add decorative elements
-                drawText(ctx, 'Date: ' + new Date().toLocaleDateString(), 60, 840, '20px Poppins', '#fff', 'left');
-
-                // Add a decorative border
-                drawFrame(ctx, 10, 10, canvas.width - 20, canvas.height - 20, '#ffd700', 10);
-
-                onSave(canvas.toDataURL('image/jpeg'));
-            };
-
-            loadAndDrawImages();
+// 2. Modern Grid (4)
+export const Layout2: React.FC<LayoutProps> = (props) => (
+  <BaseLayout
+    {...props}
+    id={2}
+    width={800}
+    height={800}
+    draw={async (ctx, canvas) => {
+      ctx.fillStyle = props.backgroundColor || "#111";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      const size = 360;
+      const positions = [
+        { x: 30, y: 30 },
+        { x: 410, y: 30 },
+        { x: 30, y: 410 },
+        { x: 410, y: 410 },
+      ];
+      for (let i = 0; i < 4; i++) {
+        if (props.images[i]) {
+          drawFrame(ctx, positions[i].x - 5, positions[i].y - 5, size + 10, size + 10, "#fff", 5);
+          await drawImage(ctx, props.images[i], positions[i].x, positions[i].y, size, size);
         }
-    }, [images, onSave, backgroundColor]);
+      }
+      drawText(
+        ctx,
+        "STUDIO MOMENTS",
+        canvas.width / 2,
+        canvas.height - 20,
+        "bold 20px Arial",
+        "#fff"
+      );
+    }}
+  />
+);
 
-    return <canvas ref={canvasRef} style={{ maxWidth: '100%', height: 'auto' }} />;
-};
+// 3. Retro Polaroid (3) - Overlapping
+export const Layout3: React.FC<LayoutProps> = (props) => (
+  <BaseLayout
+    {...props}
+    id={3}
+    width={800}
+    height={600}
+    draw={async (ctx, canvas) => {
+      ctx.fillStyle = props.backgroundColor || "#f4f4f4";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      const rots = [-0.1, 0.05, -0.05];
+      const pos = [
+        { x: 50, y: 100 },
+        { x: 250, y: 80 },
+        { x: 450, y: 120 },
+      ];
+      for (let i = 0; i < 3; i++) {
+        ctx.save();
+        ctx.translate(pos[i].x + 150, pos[i].y + 180);
+        ctx.rotate(rots[i]);
+        ctx.fillStyle = "white";
+        ctx.shadowBlur = 20;
+        ctx.shadowColor = "rgba(0,0,0,0.2)";
+        ctx.fillRect(-160, -170, 320, 380);
+        await drawImage(ctx, props.images[i], -150, -160, 300, 300);
+        ctx.restore();
+      }
+    }}
+  />
+);
 
-const Layout2: React.FC<LayoutProps> = ({ images, onSave, backgroundColor = '#ff9a9e' }) => {
-    const canvasRef = useRef<HTMLCanvasElement>(null);
+// 4. Minimal Wide (3)
+export const Layout4: React.FC<LayoutProps> = (props) => (
+  <BaseLayout
+    {...props}
+    id={4}
+    width={1000}
+    height={400}
+    draw={async (ctx, canvas) => {
+      ctx.fillStyle = "#fff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      const w = 300;
+      const h = 340;
+      for (let i = 0; i < 3; i++) {
+        await drawImage(ctx, props.images[i], 30 + i * 320, 30, w, h);
+      }
+    }}
+  />
+);
 
-    useEffect(() => {
-        if (canvasRef.current && images.length >= 3) {
-            const canvas = canvasRef.current;
-            const ctx = canvas.getContext('2d');
-            if (!ctx) return;
+// 5. Cinematic Circle (3)
+export const Layout5: React.FC<LayoutProps> = (props) => (
+  <BaseLayout
+    {...props}
+    id={5}
+    width={400}
+    height={1000}
+    draw={async (ctx, canvas) => {
+      applyGradient(ctx, canvas.width, canvas.height, ["#2c3e50", "#000000"]);
+      for (let i = 0; i < 3; i++) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(200, 180 + i * 300, 130, 0, Math.PI * 2);
+        ctx.clip();
+        await drawImage(ctx, props.images[i], 70, 50 + i * 300, 260, 260);
+        ctx.restore();
+      }
+    }}
+  />
+);
 
-            canvas.width = 900;
-            canvas.height = 700;
-
-            // Background with pattern
-            const patternCanvas = document.createElement('canvas');
-            const patternCtx = patternCanvas.getContext('2d');
-            if (!patternCtx) return;
-
-            patternCanvas.width = 20;
-            patternCanvas.height = 20;
-
-            // Draw a simple pattern
-            patternCtx.fillStyle = backgroundColor;
-            patternCtx.fillRect(0, 0, 20, 20);
-            patternCtx.fillStyle = '#fad0c4';
-            patternCtx.fillRect(0, 0, 10, 10);
-            const pattern = ctx.createPattern(patternCanvas, 'repeat');
-
-            if (pattern) {
-                ctx.fillStyle = pattern;
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-            }
-
-            // Title with white color
-            const title = 'Capture the Moment';
-            ctx.fillStyle = '#ffffff'; // Set text color to white
-            ctx.font = 'bold 48px Poppins';
-            ctx.textAlign = 'center';
-            ctx.fillText(title, canvas.width / 2, 70);
-
-            const loadAndDrawImages = async () => {
-                const positions = [
-                    { x: 50, y: 100, width: 520, height: 450 },
-                    { x: 600, y: 100, width: 250, height: 220 },
-                    { x: 600, y: 330, width: 250, height: 220 },
-                ];
-
-                for (let i = 0; i < 3; i++) {
-                    const { x, y, width, height } = positions[i];
-                    ctx.save();
-                    ctx.shadowColor = 'rgba(0,0,0,0.5)';
-                    ctx.shadowBlur = 15;
-                    ctx.shadowOffsetX = 0;
-                    ctx.shadowOffsetY = 5;
-                    // Draw image with rounded corners
-                    await drawRoundedImage(ctx, images[i], x, y, width, height, 20);
-                    ctx.restore();
-                }
-
-                // Decorative text with white color
-                ctx.fillStyle = '#ffffff'; // Set text color to white
-                ctx.font = '20px Poppins';
-                ctx.textAlign = 'right';
-                ctx.fillText('Created on: ' + new Date().toLocaleDateString(), canvas.width - 50, canvas.height - 50);
-
-                // Decorative frame
-                drawFrame(ctx, 25, 25, canvas.width - 50, canvas.height - 50, '#fff', 15);
-
-                onSave(canvas.toDataURL('image/jpeg'));
-            };
-
-            loadAndDrawImages();
+// 6. Vintage Film (3)
+export const Layout6: React.FC<LayoutProps> = (props) => (
+  <BaseLayout
+    {...props}
+    id={6}
+    width={900}
+    height={350}
+    draw={async (ctx, canvas) => {
+      ctx.fillStyle = "#111";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      for (let i = 0; i < 3; i++) {
+        await drawImage(ctx, props.images[i], 40 + i * 280, 40, 260, 260);
+        // Sprocket holes
+        ctx.fillStyle = "#fff";
+        for (let j = 0; j < 10; j++) {
+          ctx.fillRect(40 + i * 280 + j * 26, 10, 10, 15);
+          ctx.fillRect(40 + i * 280 + j * 26, 325, 10, 15);
         }
-    }, [images, onSave, backgroundColor]);
+      }
+    }}
+  />
+);
 
-    // Function to draw image with rounded corners
-    const drawRoundedImage = (ctx: CanvasRenderingContext2D, imgSrc: string, x: number, y: number, width: number, height: number, radius: number) => {
-        return new Promise<void>((resolve) => {
-            const img = new Image();
-            img.src = imgSrc;
-            img.onload = () => {
-                ctx.beginPath();
-                ctx.moveTo(x + radius, y);
-                ctx.lineTo(x + width - radius, y);
-                ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
-                ctx.lineTo(x + width, y + height - radius);
-                ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-                ctx.lineTo(x + radius, y + height);
-                ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
-                ctx.lineTo(x, y + radius);
-                ctx.quadraticCurveTo(x, y, x + radius, y);
-                ctx.closePath();
-                ctx.clip();
-                ctx.drawImage(img, x, y, width, height);
-                resolve();
-            };
-        });
-    };
-
-    return <canvas ref={canvasRef} style={{ maxWidth: '100%', height: 'auto' }} />;
-};
-
-const Layout3: React.FC<LayoutProps> = ({ images, onSave, backgroundColor = '#000' }) => {
-    const canvasRef = useRef<HTMLCanvasElement>(null);
-
-    useEffect(() => {
-        if (canvasRef.current && images.length >= 3) {
-            const canvas = canvasRef.current;
-            const ctx = canvas.getContext('2d');
-            if (!ctx) return;
-
-            canvas.width = 600;
-            canvas.height = 850;
-
-            // Background
-            ctx.fillStyle = backgroundColor;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // Title
-            drawText(ctx, 'Unforgettable Moments', canvas.width / 2, 50, 'bold 32px Poppins', '#fff');
-
-            const drawPolaroidFrame = (x: number, y: number, width: number, height: number, rotation: number) => {
-                ctx.save();
-                ctx.translate(x + width / 2, y + height / 2);
-                ctx.rotate(rotation);
-                ctx.fillStyle = '#fff';
-                ctx.fillRect(-width / 2 - 10, -height / 2 - 10, width + 20, height + 40);
-                ctx.restore();
-            };
-
-            const loadAndDrawImages = async () => {
-                const positions = [
-                    {
-                        x: 50,
-                        y: 100,
-                        width: 310,
-                        height: 200,
-                        rotation: -0.1,
-                        filters: {
-                            brightness: 120,     // 120%
-                            contrast: 110,        // 110%
-                            saturation: 120,      // 120%
-                            white: 90,            // 90%
-                            black: 10,            // 10%
-                            sepia: 20,            // 20%
-                            hue: 10,              // 10 %
-                            sharpness: 10         // 50%
-                        }
-                    },
-                    {
-                        x: 230,
-                        y: 320,
-                        width: 310,
-                        height: 200,
-                        rotation: 0.1,
-                        filters: {
-                            brightness: 90,       // 90%
-                            contrast: 120,        // 120%
-                            saturation: 80,       // 80%
-                            sepia: 30,            // 30%
-                            hue: -20,             // -20 %
-                        }
-                    },
-                    {
-                        x: 100,
-                        y: 550,
-                        width: 310,
-                        height: 200,
-                        rotation: -0.05,
-                        filters: {
-                            brightness: 100,      // 100%
-                            white: 95,            // 95%
-                            black: 5,             // 5%
-                            sharpness: 4         // 70%
-                        }
-                    },
-                ];
-
-
-                for (let i = 0; i < 3; i++) {
-                    const { x, y, width, height, rotation, filters } = positions[i];
-                    drawPolaroidFrame(x, y, width, height, rotation);
-                    await drawImage(
-                        ctx,
-                        images[i],
-                        x,
-                        y,
-                        width,
-                        height,
-                        rotation,
-                        filters  // Add to filter
-                    );
-                }
-
-                // Add decorative elements
-                drawText(ctx, 'Remember this day: ' + new Date().toLocaleDateString(), canvas.width / 2, canvas.height - 30, '20px Poppins', '#fff');
-
-                // Add a decorative border
-                drawFrame(ctx, 20, 20, canvas.width - 40, canvas.height - 40, '#fff', 5);
-
-                onSave(canvas.toDataURL('image/jpeg'));
-            };
-
-            loadAndDrawImages();
+// 7. Pastel 4-Cut (4)
+export const Layout7: React.FC<LayoutProps> = (props) => (
+  <BaseLayout
+    {...props}
+    id={7}
+    width={500}
+    height={1100}
+    draw={async (ctx, canvas) => {
+      ctx.fillStyle = "#f0e6ff"; // Pastel purple
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      for (let i = 0; i < 4; i++) {
+        if (props.images[i]) {
+          const y = 40 + i * 250;
+          ctx.fillStyle = "white";
+          ctx.fillRect(35, y - 5, 430, 240);
+          await drawImage(ctx, props.images[i], 40, y, 420, 230);
         }
-    }, [images, onSave, backgroundColor]);
+      }
+      drawText(ctx, "LIFE FOUR CUTS", canvas.width / 2, 1060, "bold 24px Serif", "#9b87f5");
+    }}
+  />
+);
 
-    return <canvas ref={canvasRef} style={{ maxWidth: '100%', height: 'auto' }} />;
-};
-
-
-const Layout4: React.FC<LayoutProps> = ({ images, onSave, backgroundColor = '#000' }) => {
-    const canvasRef = useRef<HTMLCanvasElement>(null);
-
-    useEffect(() => {
-        if (canvasRef.current && images.length >= 3) {
-            const canvas = canvasRef.current;
-            const ctx = canvas.getContext('2d');
-            if (!ctx) return;
-
-            canvas.width = 970;
-            canvas.height = 500;
-
-            // Fungsi load background
-            const loadBackground = () => {
-                return new Promise<HTMLImageElement>((resolve, reject) => {
-                    const bgImage = new Image();
-                    bgImage.src = '/assets/images/images3.jpg';
-
-                    bgImage.onload = () => resolve(bgImage);
-                    bgImage.onerror = reject;
-                });
-            };
-
-            const drawPhotos = async () => {
-                try {
-                    // Load background image (optional)
-                    let bgImage: HTMLImageElement | undefined;
-                    try {
-                        bgImage = await loadBackground();
-                    } catch (error) {
-                        console.error('Background image load failed', error);
-                    }
-
-                    // Draw background
-                    if (bgImage) {
-                        // Scale and crop background to fit canvas
-                        const scale = Math.max(
-                            canvas.width / bgImage.width,
-                            canvas.height / bgImage.height
-                        );
-                        const width = bgImage.width * scale;
-                        const height = bgImage.height * scale;
-                        const x = (canvas.width - width) / 2;
-                        const y = (canvas.height - height) / 2;
-
-                        ctx.drawImage(bgImage, x, y, width, height);
-                    } else {
-                        // Fallback gradient background
-                        const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-                        gradient.addColorStop(0, '#FF6B6B');
-                        gradient.addColorStop(1, '#4ECDC4');
-                        ctx.fillStyle = gradient;
-                        ctx.fillRect(0, 0, canvas.width, canvas.height);
-                    }
-
-                    // Positions for images
-                    const positions = [
-                        { x: 50, y: 40, width: 260, height: 400, rotation: 0 },
-                        { x: 350, y: 40, width: 260, height: 400, rotation: 0 },
-                        { x: 660, y: 40, width: 260, height: 400, rotation: 0 }
-                    ];
-
-                    const drawFramedImage = async (imgSrc: string, x: number, y: number, width: number, height: number, rotation: number) => {
-                        return new Promise<void>((resolve) => {
-                            const img = new Image();
-                            img.src = imgSrc;
-                            img.onload = () => {
-                                ctx.save();
-                                ctx.translate(x + width / 2, y + height / 2);
-                                ctx.rotate(rotation);
-
-                                // Shadow effect
-                                ctx.shadowColor = 'rgba(0,0,0,0.3)';
-                                ctx.shadowBlur = 15;
-                                ctx.shadowOffsetX = 5;
-                                ctx.shadowOffsetY = 5;
-
-                                // White frame
-                                ctx.fillStyle = 'white';
-                                ctx.fillRect(-width / 2 - 10, -height / 2 - 10, width + 20, height + 20);
-
-                                // Draw image
-                                ctx.drawImage(img, -width / 2, -height / 2, width, height);
-
-                                ctx.restore();
-                                resolve();
-                            };
-                        });
-                    };
-
-                    for (let i = 0; i < 3; i++) {
-                        const { x, y, width, height, rotation } = positions[i];
-                        await drawFramedImage(images[i], x, y, width, height, rotation);
-                    }
-
-
-
-                    onSave(canvas.toDataURL('image/jpeg'));
-                } catch (error) {
-                    console.error('Error drawing layout:', error);
-                }
-            };
-
-            drawPhotos();
+// 8. Neo Tokyo (4)
+export const Layout8: React.FC<LayoutProps> = (props) => (
+  <BaseLayout
+    {...props}
+    id={8}
+    width={800}
+    height={800}
+    draw={async (ctx, canvas) => {
+      ctx.fillStyle = "#050505";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      const colors = ["#ff00ff", "#00ffff", "#ffff00", "#00ff00"];
+      const pos = [
+        { x: 35, y: 35 },
+        { x: 415, y: 35 },
+        { x: 35, y: 415 },
+        { x: 415, y: 415 },
+      ];
+      for (let i = 0; i < 4; i++) {
+        if (props.images[i]) {
+          ctx.shadowBlur = 15;
+          ctx.shadowColor = colors[i];
+          drawFrame(ctx, pos[i].x, pos[i].y, 350, 350, colors[i], 4);
+          ctx.shadowBlur = 0;
+          await drawImage(ctx, props.images[i], pos[i].x + 5, pos[i].y + 5, 340, 340);
         }
-    }, [images, onSave, backgroundColor]);
+      }
+    }}
+  />
+);
 
-    return <canvas ref={canvasRef} style={{ maxWidth: '100%', height: 'auto' }} />;
-};
+// 9. Kawaii Pink (3)
+export const Layout9: React.FC<LayoutProps> = (props) => (
+  <BaseLayout
+    {...props}
+    id={9}
+    width={600}
+    height={950}
+    draw={async (ctx, canvas) => {
+      ctx.fillStyle = "#ffd1dc";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      // Add some small hearts
+      ctx.fillStyle = "#ff69b4";
+      for (let k = 0; k < 20; k++) {
+        drawText(
+          ctx,
+          "❤",
+          Math.random() * canvas.width,
+          Math.random() * canvas.height,
+          "20px Arial",
+          "#ff69b444"
+        );
+      }
+      for (let i = 0; i < 3; i++) {
+        const y = 60 + i * 280;
+        ctx.fillStyle = "white";
+        ctx.roundRect?.(45, y - 5, 510, 260, 20);
+        ctx.fill();
+        await drawImage(ctx, props.images[i], 50, y, 500, 250);
+      }
+      drawText(ctx, "STAY CUTE", canvas.width / 2, 920, "bold 30px Comic Sans MS", "#ff1493");
+    }}
+  />
+);
 
+// 10. Y2K Sparkle (3)
+export const Layout10: React.FC<LayoutProps> = (props) => (
+  <BaseLayout
+    {...props}
+    id={10}
+    width={900}
+    height={400}
+    draw={async (ctx, canvas) => {
+      applyGradient(ctx, canvas.width, canvas.height, ["#a18cd1", "#fbc2eb", "#fad0c4"]);
+      for (let i = 0; i < 3; i++) {
+        ctx.shadowBlur = 20;
+        ctx.shadowColor = "rgba(255,255,255,0.5)";
+        await drawImage(ctx, props.images[i], 40 + i * 280, 40, 260, 320);
+        drawText(ctx, "✨", 40 + i * 280, 30, "20px Arial", "#fff");
+      }
+      ctx.shadowBlur = 0;
+    }}
+  />
+);
 
-const Layout5: React.FC<LayoutProps> = ({ images, onSave, backgroundColor = '#000' }) => {
-    const canvasRef = useRef<HTMLCanvasElement>(null);
+// 11. Cloud 9 (3)
+export const Layout11: React.FC<LayoutProps> = (props) => (
+  <BaseLayout
+    {...props}
+    id={11}
+    width={800}
+    height={800}
+    draw={async (ctx, canvas) => {
+      ctx.fillStyle = "#87CEEB";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "rgba(255,255,255,0.5)";
+      for (let k = 0; k < 5; k++) {
+        ctx.beginPath();
+        ctx.arc(100 + k * 150, 100 + k * 100, 50, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(140 + k * 150, 100 + k * 100, 60, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      const pos = [
+        { x: 80, y: 80 },
+        { x: 420, y: 150 },
+        { x: 150, y: 450 },
+      ];
+      for (let i = 0; i < 3; i++) {
+        drawFrame(ctx, pos[i].x - 10, pos[i].y - 10, 320, 270, "#fff", 10);
+        await drawImage(ctx, props.images[i], pos[i].x, pos[i].y, 300, 250);
+      }
+    }}
+  />
+);
 
-    useEffect(() => {
-        if (canvasRef.current && images.length >= 3) {
-            const canvas = canvasRef.current;
-            const ctx = canvas.getContext('2d');
-            if (!ctx) return;
+// 12. Gallery Collage (3)
+export const Layout12: React.FC<LayoutProps> = (props) => (
+  <BaseLayout
+    {...props}
+    id={12}
+    width={800}
+    height={800}
+    draw={async (ctx, canvas) => {
+      ctx.fillStyle = "#e5e5e5";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      // Big one
+      await drawImage(ctx, props.images[0], 40, 40, 450, 550);
+      // Small ones
+      await drawImage(ctx, props.images[1], 510, 40, 250, 265);
+      await drawImage(ctx, props.images[2], 510, 325, 250, 265);
+      drawText(ctx, "EXHIBITION ONE", 40, 650, "bold 50px Arial", "#333", "left");
+    }}
+  />
+);
 
-            canvas.width = 400;
-            canvas.height = 1000;
-
-            // Fungsi untuk memuat background
-            const loadBackground = () => {
-                return new Promise<HTMLImageElement>((resolve, reject) => {
-                    const bgImage = new Image();
-
-                    // Gunakan path relatif dari public
-                    bgImage.src = '/assets/images/images1.jpg';
-
-                    bgImage.onload = () => resolve(bgImage);
-                    bgImage.onerror = reject;
-                });
-            };
-
-            const drawBackground = async (bgImage: HTMLImageElement) => {
-                // Menyesuaikan gambar ke ukuran canvas dengan cover effect
-                const scale = Math.max(
-                    canvas.width / bgImage.width,
-                    canvas.height / bgImage.height
-                );
-
-                const width = bgImage.width * scale;
-                const height = bgImage.height * scale;
-
-                const x = (canvas.width - width) / 2;
-                const y = (canvas.height - height) / 2;
-
-                // Blur effect for background
-
-                ctx.drawImage(bgImage, x, y, width, height);
-                ctx.filter = 'none'; // Reset filter
-            };
-
-            const drawCircularImage = async (imgSrc: string, centerX: number, centerY: number, radius: number) => {
-                return new Promise<void>((resolve) => {
-                    const img = new Image();
-                    img.src = imgSrc;
-                    img.onload = () => {
-                        ctx.save();
-
-                        // Create circular clipping path with glow effect
-                        ctx.shadowColor = 'rgba(0,0,0,0.3)';
-                        ctx.shadowBlur = 20;
-
-                        // Create circular clipping path
-                        ctx.beginPath();
-                        ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-                        ctx.closePath();
-                        ctx.clip();
-
-                        // Soft white background for spacing
-                        ctx.fillStyle = 'rgba(255,255,255,0.8)';
-                        ctx.beginPath();
-                        ctx.arc(centerX, centerY, radius + 10, 0, Math.PI * 2);
-                        ctx.fill();
-
-                        // Scale and center the image
-                        const scale = Math.max(
-                            radius * 2 / img.width,
-                            radius * 2 / img.height
-                        );
-                        const width = img.width * scale;
-                        const height = img.height * scale;
-                        const x = centerX - width / 2;
-                        const y = centerY - height / 2;
-
-                        // Draw image
-                        ctx.drawImage(img, x, y, width, height);
-
-                        // Soft border
-                        ctx.beginPath();
-                        ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-                        ctx.strokeStyle = 'rgba(255,255,255,0.5)';
-                        ctx.lineWidth = 10;
-                        ctx.stroke();
-
-                        ctx.restore();
-                        resolve();
-                    };
-                });
-            };
-
-            const drawPhotos = async () => {
-                try {
-                    // Load and draw background
-                    const bgImage = await loadBackground();
-                    await drawBackground(bgImage);
-
-                    // Add soft white borders on sides
-                    ctx.fillStyle = 'rgba(255,255,255,0.2)';
-                    ctx.fillRect(0, 0, 20, canvas.height); // Left border
-                    ctx.fillRect(canvas.width - 20, 0, 20, canvas.height); // Right border
-
-                    const centerX = canvas.width / 2;
-                    const radius = 130;
-                    const spacing = 300;
-
-                    // Draw circular images
-                    await Promise.all([
-                        drawCircularImage(images[0], centerX, 200, radius),
-                        drawCircularImage(images[1], centerX, 200 + spacing, radius),
-                        drawCircularImage(images[2], centerX, 200 + (spacing * 2), radius)
-                    ]);
-
-                    // Title with shadow
-                    ctx.fillStyle = 'white';
-                    ctx.shadowColor = 'rgba(0,0,0,0.5)';
-                    ctx.shadowBlur = 10;
-                    ctx.font = 'bold 28px Arial';
-                    ctx.textAlign = 'center';
-                    ctx.fillText('Moments', centerX, 43);
-
-                    // Reset shadow
-                    ctx.shadowColor = 'transparent';
-                    ctx.shadowBlur = 0;
-
-                    // Date
-                    ctx.fillStyle = 'rgba(255,255,255,0.8)';
-                    ctx.font = '18px Arial';
-                    ctx.fillText(new Date().toLocaleDateString(), centerX, canvas.height - 40);
-
-                    // Save canvas
-                    onSave(canvas.toDataURL('image/jpeg'));
-                } catch (error) {
-                    console.error('Error drawing layout:', error);
-                }
-            };
-
-            drawPhotos();
+// 13. Midnight (4)
+export const Layout13: React.FC<LayoutProps> = (props) => (
+  <BaseLayout
+    {...props}
+    id={13}
+    width={600}
+    height={1000}
+    draw={async (ctx, canvas) => {
+      applyGradient(ctx, canvas.width, canvas.height, ["#000428", "#004e92"]);
+      for (let k = 0; k < 50; k++) {
+        ctx.fillStyle = "#fff";
+        ctx.beginPath();
+        ctx.arc(Math.random() * 600, Math.random() * 1000, Math.random() * 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      for (let i = 0; i < 4; i++) {
+        if (props.images[i]) {
+          const y = 60 + i * 220;
+          drawFrame(ctx, 95, y - 5, 410, 200, "rgba(255,255,255,0.2)", 2);
+          await drawImage(ctx, props.images[i], 100, y, 400, 190);
         }
-    }, [images, onSave, backgroundColor]);
+      }
+    }}
+  />
+);
 
-    return <canvas ref={canvasRef} style={{ maxWidth: '100%', height: 'auto' }} />;
-};
+// 14. Sunset Horz (3)
+export const Layout14: React.FC<LayoutProps> = (props) => (
+  <BaseLayout
+    {...props}
+    id={14}
+    width={1000}
+    height={500}
+    draw={async (ctx, canvas) => {
+      applyGradient(ctx, canvas.width, canvas.height, ["#f12711", "#f5af19"]);
+      for (let i = 0; i < 3; i++) {
+        await drawImage(ctx, props.images[i], 50 + i * 310, 100, 280, 300);
+      }
+      drawText(ctx, "GOLDEN HOUR", canvas.width / 2, 60, "bold 40px Serif", "#fff");
+    }}
+  />
+);
 
-const Layout6: React.FC<LayoutProps> = ({ images, onSave, backgroundColor = '#000' }) => {
-    const canvasRef = useRef<HTMLCanvasElement>(null);
+// 15. Doodle Fun (3)
+export const Layout15: React.FC<LayoutProps> = (props) => (
+  <BaseLayout
+    {...props}
+    id={15}
+    width={600}
+    height={900}
+    draw={async (ctx, canvas) => {
+      ctx.fillStyle = "#fff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      for (let i = 0; i < 3; i++) {
+        const y = 50 + i * 270;
+        ctx.strokeStyle = "#000";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.roundRect?.(50, y, 500, 240, 10);
+        ctx.stroke();
+        await drawImage(ctx, props.images[i], 55, y + 5, 490, 230);
+        drawText(ctx, "✎", 520, y + 20, "20px Arial", "#000");
+      }
+    }}
+  />
+);
 
-    useEffect(() => {
-        if (canvasRef.current && images.length >= 3) {
-            const canvas = canvasRef.current;
-            const ctx = canvas.getContext('2d');
-            if (!ctx) return;
-
-            canvas.width = 600;
-            canvas.height = 1000;
-
-            // Fungsi load background
-            const loadBackground = () => {
-                return new Promise<HTMLImageElement>((resolve, reject) => {
-                    const bgImage = new Image();
-                    bgImage.src = '/assets/images/images2.jpg'; // Sesuaikan path
-
-                    bgImage.onload = () => resolve(bgImage);
-                    bgImage.onerror = reject;
-                });
-            };
-
-            const drawPhotos = async () => {
-                try {
-                    // Load background image (optional)
-                    let bgImage: HTMLImageElement | undefined;
-                    try {
-                        bgImage = await loadBackground();
-                    } catch (error) {
-                        console.error('Background image load failed', error);
-                    }
-
-                    // Draw background
-                    if (bgImage) {
-                        // Scale and crop background to fit canvas
-                        const scale = Math.max(
-                            canvas.width / bgImage.width,
-                            canvas.height / bgImage.height
-                        );
-                        const width = bgImage.width * scale;
-                        const height = bgImage.height * scale;
-                        const x = (canvas.width - width) / 2;
-                        const y = (canvas.height - height) / 2;
-
-                        ctx.drawImage(bgImage, x, y, width, height);
-                    } else {
-                        // Fallback dark background
-                        ctx.fillStyle = '#212121';
-                        ctx.fillRect(0, 0, canvas.width, canvas.height);
-                    }
-
-                    const positions = [
-                        { x: 47, y: 170, width: 250, height: 300 },
-                        { x: 317, y: 170, width: 250, height: 300 },
-                        { x: 47, y: 500, width: 520, height: 400 }
-                    ];
-
-                    const drawImageWithBorder = async (imgSrc: string, x: number, y: number, width: number, height: number) => {
-                        return new Promise<void>((resolve) => {
-                            const img = new Image();
-                            img.src = imgSrc;
-                            img.onload = () => {
-                                // Draw border
-                                ctx.fillStyle = '#ffffff';
-                                ctx.fillRect(x - 5, y - 5, width + 10, height + 10);
-                                // Draw image
-                                ctx.drawImage(img, x, y, width, height);
-                                resolve();
-                            };
-                        });
-                    };
-
-                    // Draw individual photos
-                    for (let i = 0; i < 3; i++) {
-                        const { x, y, width, height } = positions[i];
-                        await drawImageWithBorder(images[i], x, y, width, height);
-                    }
-
-                    // Border teks hitam 5px
-                    ctx.strokeStyle = 'black';
-                    ctx.lineWidth = 2;
-                    ctx.font = 'bold 56px Poppins';
-                    ctx.textAlign = 'center';
-                    ctx.strokeText('Vintage Memories', canvas.width / 2, 137);
-
-                    // Isi teks putih
-                    ctx.fillStyle = '#ffffff';
-                    ctx.font = 'bold 56px Poppins';
-                    ctx.textAlign = 'center';
-                    ctx.fillText('Vintage Memories', canvas.width / 2, 137);
-
-                    // Date - now in white
-                    ctx.fillStyle = 'black';
-                    ctx.font = '20px Poppins';
-                    ctx.fillText('On this day: ' + new Date().toLocaleDateString(), canvas.width / 2, canvas.height - 20);
-
-                    onSave(canvas.toDataURL('image/jpeg'));
-                } catch (error) {
-                    console.error('Error drawing layout:', error);
-                }
-            };
-
-            drawPhotos();
+// 16. Geometric (4)
+export const Layout16: React.FC<LayoutProps> = (props) => (
+  <BaseLayout
+    {...props}
+    id={16}
+    width={800}
+    height={800}
+    draw={async (ctx, canvas) => {
+      ctx.fillStyle = "#ff6b6b";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#4ecdc4";
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(800, 0);
+      ctx.lineTo(0, 800);
+      ctx.fill();
+      const pos = [
+        { x: 50, y: 50 },
+        { x: 450, y: 50 },
+        { x: 50, y: 450 },
+        { x: 450, y: 450 },
+      ];
+      for (let i = 0; i < 4; i++) {
+        if (props.images[i]) {
+          ctx.fillStyle = "#fff";
+          ctx.fillRect(pos[i].x - 10, pos[i].y - 10, 320, 320);
+          await drawImage(ctx, props.images[i], pos[i].x, pos[i].y, 300, 300);
         }
-    }, [images, onSave, backgroundColor]);
+      }
+    }}
+  />
+);
 
-    return <canvas ref={canvasRef} style={{ maxWidth: '100%', height: 'auto' }} />;
-};
+// 17. Studio Solo (1)
+export const Layout17: React.FC<LayoutProps> = (props) => (
+  <BaseLayout
+    {...props}
+    id={17}
+    width={800}
+    height={1000}
+    draw={async (ctx, canvas) => {
+      ctx.fillStyle = "#fff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      drawFrame(ctx, 40, 40, 720, 920, "#111", 2);
+      await drawImage(ctx, props.images[0], 60, 60, 680, 800);
+      drawText(ctx, "SIGNATURE SERIES", canvas.width / 2, 920, "16px Monospace", "#111");
+    }}
+  />
+);
 
-export {
-    Layout1, Layout2, Layout3, Layout4, Layout5, Layout6,
-};
+// 18. Sticker Bomb (3)
+export const Layout18: React.FC<LayoutProps> = (props) => (
+  <BaseLayout
+    {...props}
+    id={18}
+    width={800}
+    height={600}
+    draw={async (ctx, canvas) => {
+      ctx.fillStyle = "#fffc00"; // Snapchat yellow
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      const stickers = ["⭐", "🔥", "💖", "😎", "🍕", "🌈"];
+      for (let i = 0; i < 3; i++) {
+        ctx.save();
+        ctx.translate(150 + i * 250, 300);
+        ctx.rotate((i - 1) * 0.1);
+        ctx.fillStyle = "#fff";
+        ctx.fillRect(-110, -110, 220, 220);
+        await drawImage(ctx, props.images[i], -100, -100, 200, 200);
+        drawText(ctx, stickers[i * 2], 80, -80, "40px Arial", "#000");
+        ctx.restore();
+      }
+    }}
+  />
+);
+
+// 19. Hologram (3)
+export const Layout19: React.FC<LayoutProps> = (props) => (
+  <BaseLayout
+    {...props}
+    id={19}
+    width={900}
+    height={400}
+    draw={async (ctx, canvas) => {
+      const grad = ctx.createLinearGradient(0, 0, 900, 400);
+      grad.addColorStop(0, "#00d2ff");
+      grad.addColorStop(0.5, "#928dab");
+      grad.addColorStop(1, "#00d2ff");
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, 900, 400);
+      for (let i = 0; i < 3; i++) {
+        ctx.save();
+        ctx.globalAlpha = 0.8;
+        drawFrame(ctx, 40 + i * 280, 40, 260, 320, "#fff", 3);
+        await drawImage(ctx, props.images[i], 45 + i * 280, 45, 250, 310);
+        ctx.restore();
+      }
+    }}
+  />
+);
+
+// 20. News Retro (3)
+export const Layout20: React.FC<LayoutProps> = (props) => (
+  <BaseLayout
+    {...props}
+    id={20}
+    width={700}
+    height={1000}
+    draw={async (ctx, canvas) => {
+      ctx.fillStyle = "#f4ecd8"; // Old paper
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      drawText(ctx, "DAILY CAPTURE", canvas.width / 2, 80, "bold 70px Times New Roman", "#222");
+      ctx.fillRect(40, 100, 620, 5);
+      for (let i = 0; i < 3; i++) {
+        const y = 140 + i * 260;
+        // Draw in grayscale simulation by drawing and then applying filter if needed
+        // but the drawImage filters can handle it!
+        await drawImage(ctx, props.images[i], 50, y, 600, 230, 0, { saturation: -100 });
+        drawText(
+          ctx,
+          "LOREM IPSUM DOLOR SIT AMET",
+          50,
+          y + 250,
+          "italic 12px Times New Roman",
+          "#222",
+          "left"
+        );
+      }
+      ctx.fillRect(40, 930, 620, 2);
+    }}
+  />
+);
+
+export { BaseLayout };

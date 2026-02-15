@@ -81,7 +81,6 @@
   }
 }
 
-
 @layer utilities {
   .animate-flash {
     animation: flash 0.3s;
@@ -101,9 +100,16 @@
 }
 
 .clip-triangle {
-    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+  clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
 }
 
 .clip-hexagon {
-    clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+  clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+}
+
+@layer utilities {
+  .bg-dots {
+    background-image: radial-gradient(circle, #ffffff10 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
 }

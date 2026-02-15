@@ -33,7 +33,7 @@ export const CameraView = React.forwardRef<unknown, CameraProps>(
     }, [activeDeviceId]);
 
     return (
-      <div ref={containerRef} className="min-h-[calc(100vh_-_theme(spacing.16))] bg-muted">
+      <div ref={containerRef} className="h-full bg-black overflow-hidden relative">
         <div className="absolute left-0 top-0 h-svh w-full">
           <WarningMessage message={errorMessages.noCameraAccessible!} show={notSupported} />
           <WarningMessage message={errorMessages.permissionDenied!} show={permissionDenied} />

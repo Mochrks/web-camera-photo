@@ -1,30 +1,13 @@
 "use client";
 
-import { ArrowLeftRight, Images, X } from "lucide-react";
+import { ArrowLeftRight, Images, X, Timer, Zap, Grid3X3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CameraView } from "./camera-view";
-import { FC, useRef, useState, useEffect } from "react";
+import { FC, useRef, useState, useEffect, useCallback } from "react";
 import { CameraType } from "@/components/camera/camera-types";
 import { useCamera } from "@/components/camera/camera-provider";
 import { cn } from "@/lib/utils";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { ScrollArea } from "../ui/scroll-area";
-import { FilterTone } from "./filter-tone";
-import { AdjustmentPanel } from "./adjustment-panel";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface CameraProps {
   onClosed: () => void;
@@ -34,275 +17,228 @@ interface CameraProps {
 
 const Camera: FC<CameraProps> = ({ onClosed, onCapturedImages, requiredPhotos }) => {
   const camera = useRef<CameraType>();
-  const { images, addImage, numberOfCameras, resetImages, stopStream } = useCamera();
+  const { addImage, stopStream, switchCamera, resetImages } = useCamera();
+  const [sessionImages, setSessionImages] = useState<string[]>([]);
   const [photoCount, setPhotoCount] = useState(0);
   const [timerActive, setTimerActive] = useState(false);
-  const [timerDuration, setTimerDuration] = useState(4);
+  const [timerDuration, setTimerDuration] = useState(3);
   const [showFlash, setShowFlash] = useState(false);
   const [showGrid, setShowGrid] = useState(false);
   const [timerCount, setTimerCount] = useState(0);
+  const [flashMode, setFlashMode] = useState<"auto" | "on" | "off">("auto");
+
+  useEffect(() => {
+    resetImages();
+  }, [resetImages]);
+
+  const capturePhoto = useCallback(() => {
+    if (camera.current) {
+      if (flashMode === "on" || (flashMode === "auto" && Math.random() > 0.5)) {
+        setShowFlash(true);
+      }
+
+      setTimeout(() => {
+        const imageData = camera.current?.takePhoto();
+        if (imageData) {
+          // Store locally in sessionImages for immediate result passing
+          setSessionImages((prev) => {
+            const updated = [...prev, imageData];
+
+            // Sync with global provider too
+            addImage(imageData);
+
+            if (updated.length === requiredPhotos) {
+              // End session immediately after last shot is clear
+              setTimeout(() => {
+                onCapturedImages(updated);
+              }, 500);
+            }
+            return updated;
+          });
+
+          setPhotoCount((prev) => prev + 1);
+        }
+        setShowFlash(false);
+      }, 100);
+    }
+  }, [flashMode, addImage, requiredPhotos, onCapturedImages]);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (timerCount > 0) {
       timer = setTimeout(() => {
-        setTimerCount(timerCount - 1);
         if (timerCount === 1) {
           capturePhoto();
+          setTimerCount(0);
+        } else {
+          setTimerCount(timerCount - 1);
         }
       }, 1000);
     }
     return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [timerCount]);
+  }, [timerCount, capturePhoto]);
 
   const handleCapture = () => {
-    if (timerActive) {
-      setTimerCount(timerDuration);
-    } else {
-      capturePhoto();
-    }
-  };
-
-  const capturePhoto = () => {
-    if (camera.current) {
-      setShowFlash(true);
-      setTimeout(() => {
-        const imageData = camera.current?.takePhoto();
-        if (imageData) {
-          addImage(imageData);
-          setPhotoCount((prev) => {
-            const newCount = prev + 1;
-            if (newCount === requiredPhotos) {
-              onCapturedImages([...images, imageData]);
-            }
-            return newCount;
-          });
-        }
-        setShowFlash(false);
-      }, 150);
+    if (photoCount < requiredPhotos && timerCount === 0) {
+      if (timerActive) {
+        setTimerCount(timerDuration);
+      } else {
+        capturePhoto();
+      }
     }
   };
 
   const handleClose = () => {
     stopStream();
     onClosed();
-    window.location.reload();
   };
 
   return (
-    <div className="z-10 flex min-h-screen w-full flex-col bg-black">
-      <div className="relative flex-1">
-        <div className="absolute z-20 w-full h-16 flex justify-between items-center px-4">
-          {/* button back */}
-          <Button
-            className="rounded-full p-2 bg-gray-800 text-white hover:bg-gray-700"
-            size="icon"
-            onClick={handleClose}
-          >
-            <X className="h-6 w-6" />
-            <span className="sr-only">Close camera</span>
-          </Button>
-          <div className="flex space-x-2">
-            {/* filters */}
-            {/* <FilterTone /> */}
-
-            {/* adjustment */}
-            {/* <AdjustmentPanel /> */}
-
-            {/* timer */}
-            <Select
-              value={timerActive ? timerDuration.toString() : "off"}
-              onValueChange={(value) => {
-                if (value === "off") {
-                  setTimerActive(false);
-                } else {
-                  setTimerActive(true);
-                  setTimerDuration(parseInt(value));
-                }
-              }}
-            >
-              <SelectTrigger className="w-[100px] bg-gray-800 text-white">
-                <SelectValue placeholder="Timer" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="off">Timer</SelectItem>
-                <SelectItem value="4">4s</SelectItem>
-                <SelectItem value="5">5s</SelectItem>
-                <SelectItem value="10">10s</SelectItem>
-              </SelectContent>
-            </Select>
-
-            {/* grid */}
-            <Button
-              className={cn(
-                "rounded-full p-2",
-                showGrid ? "bg-blue-500 text-white" : "bg-gray-800 text-white hover:bg-gray-700"
-              )}
-              size="icon"
-              onClick={() => setShowGrid(!showGrid)}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                <line x1="3" y1="9" x2="21" y2="9"></line>
-                <line x1="3" y1="15" x2="21" y2="15"></line>
-                <line x1="9" y1="3" x2="9" y2="21"></line>
-                <line x1="15" y1="3" x2="15" y2="21"></line>
-              </svg>
-              <span className="sr-only">Toggle grid</span>
-            </Button>
-          </div>
-        </div>
-
+    <div className="fixed inset-0 z-[100] flex flex-col bg-black text-white font-sans overflow-hidden select-none">
+      {/* Background Camera View */}
+      <div className="absolute inset-0 z-0">
         <CameraView ref={camera} />
 
-        <div className="absolute bottom-1 left-0 right-0 flex justify-center items-center space-x-20 md:space-x-10 bg-gray-600 bg-opacity-40 py-14">
-          <Gallery />
-          <Button
-            className="h-16 w-16 rounded-full bg-white hover:bg-gray-300 p-2 shadow-lg"
+        {/* Simple Flash Overlay */}
+        {showFlash && <div className="absolute inset-0 bg-white z-[120] opacity-100" />}
+
+        {/* Static Grid Overlay */}
+        {showGrid && (
+          <div className="absolute inset-0 z-10 pointer-events-none opacity-40">
+            <div className="absolute top-0 bottom-0 left-1/3 w-px bg-white" />
+            <div className="absolute top-0 bottom-0 left-2/3 w-px bg-white" />
+            <div className="absolute left-0 right-0 top-1/3 h-px bg-white" />
+            <div className="absolute left-0 right-0 top-2/3 h-px bg-white" />
+          </div>
+        )}
+      </div>
+
+      {/* Simplified Top Bar */}
+      <div className="relative h-20 flex items-center justify-between px-6 z-50 bg-black/40">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="rounded-full bg-white/10 hover:bg-white/20 text-white"
+          onClick={handleClose}
+        >
+          <X className="h-5 w-5" />
+        </Button>
+
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() =>
+              setFlashMode((curr) => (curr === "auto" ? "on" : curr === "on" ? "off" : "auto"))
+            }
+            className={cn(
+              "w-10 h-10 flex items-center justify-center rounded-full transition-all",
+              flashMode !== "off" ? "text-yellow-400 bg-yellow-400/20" : "text-white bg-white/10"
+            )}
+          >
+            <Zap className={cn("h-4 w-4", flashMode === "on" && "fill-current")} />
+          </button>
+
+          <button
+            onClick={() => setTimerActive(!timerActive)}
+            className={cn(
+              "w-10 h-10 flex items-center justify-center rounded-full transition-all",
+              timerActive ? "text-yellow-400 bg-yellow-400/20" : "text-white bg-white/10"
+            )}
+          >
+            <Timer className="h-4 w-4" />
+          </button>
+
+          <button
+            onClick={() => setShowGrid(!showGrid)}
+            className={cn(
+              "w-10 h-10 flex items-center justify-center rounded-full transition-all",
+              showGrid ? "text-yellow-400 bg-yellow-400/20" : "text-white bg-white/10"
+            )}
+          >
+            <Grid3X3 className="h-4 w-4" />
+          </button>
+        </div>
+
+        <div className="flex flex-col items-end">
+          <div className="px-4 py-1 rounded-full bg-indigo-600 text-[10px] font-black tracking-widest border border-indigo-400">
+            {photoCount} / {requiredPhotos}
+          </div>
+        </div>
+      </div>
+
+      {/* Simplified Countdown */}
+      <div className="flex-1 flex items-center justify-center pointer-events-none relative z-50">
+        <AnimatePresence>
+          {timerCount > 0 && (
+            <motion.span
+              key={timerCount}
+              initial={{ scale: 1.5, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="text-[12rem] font-black text-white"
+            >
+              {timerCount}
+            </motion.span>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* Simplified Bottom Bar */}
+      <div className="relative h-64 flex flex-col items-center justify-center px-10 z-50 bg-black/60 pb-10">
+        <div className="w-full max-w-lg flex items-center justify-between gap-8">
+          {/* Gallery Preview */}
+          <div className="w-16 h-16 rounded-full border border-white/20 bg-neutral-900 overflow-hidden">
+            {sessionImages.length > 0 ? (
+              <img
+                src={sessionImages[sessionImages.length - 1]}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center opacity-20">
+                <Images className="w-4 h-4" />
+              </div>
+            )}
+          </div>
+
+          {/* Simple Shutter */}
+          <button
             onClick={handleCapture}
             disabled={photoCount === requiredPhotos || timerCount > 0}
+            className="relative w-24 h-24 flex items-center justify-center group"
           >
-            <div className="h-14 w-14 rounded-full bg-red-500 hover:bg-red-600" />
-            <span className="sr-only">Capture photo</span>
-          </Button>
-          {numberOfCameras > 0 && <SwitchCamera />}
+            <div className="absolute inset-0 rounded-full border-[4px] border-white transition-all group-active:scale-90" />
+            <div
+              className={cn(
+                "w-[80%] h-[80%] rounded-full bg-white transition-all",
+                photoCount === requiredPhotos || timerCount > 0 ? "opacity-20" : "opacity-100"
+              )}
+            />
+          </button>
+
+          {/* Switch Camera */}
+          <button
+            className="w-16 h-16 rounded-full bg-white/10 hover:bg-white/20 transition-all flex items-center justify-center active:rotate-180"
+            onClick={switchCamera}
+          >
+            <ArrowLeftRight className="h-6 w-6 text-white" />
+          </button>
         </div>
+      </div>
 
-        <div className="absolute bottom-48 left-0 right-0 flex justify-center">
-          <Button disabled={photoCount === requiredPhotos}>
-            Capture ({photoCount}/{requiredPhotos})
-          </Button>
-        </div>
-
-        {showGrid && (
-          <div className="absolute inset-0 pointer-events-none">
-            <div className="w-full h-full grid grid-cols-3 grid-rows-3">
-              {[...Array(9)].map((_, i) => (
-                <div key={i} className="border border-gray-600 opacity-40"></div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {timerCount > 0 && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
-            <span className="text-9xl text-white font-bold">{timerCount}</span>
-          </div>
-        )}
-
-        {showFlash && <div className="absolute inset-0 bg-white animate-flash"></div>}
+      {/* Progress Bar */}
+      <div className="absolute bottom-0 left-0 w-full h-1 flex z-[100]">
+        {[...Array(requiredPhotos)].map((_, i) => (
+          <div
+            key={i}
+            className={cn(
+              "grow h-full transition-all duration-300",
+              i < photoCount ? "bg-indigo-500" : "bg-white/10"
+            )}
+          />
+        ))}
       </div>
     </div>
   );
 };
-
-function SwitchCamera() {
-  const { devices, setActiveDeviceId, switchCamera } = useCamera();
-
-  if (devices.length === 2) {
-    return (
-      <Button
-        className="flex items-center justify-center w-16 h-10 p-2 bg-gray-800 text-white hover:bg-gray-700 transition duration-200"
-        size="icon"
-        onClick={switchCamera}
-      >
-        <ArrowLeftRight className="fixed h-6 w-6" />
-        <span className="sr-only">Switch camera</span>
-      </Button>
-    );
-  }
-  return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button
-          className="flex items-center justify-center w-16 h-10 p-2 bg-gray-800 text-white hover:bg-gray-700 transition duration-200"
-          size="icon"
-        >
-          <ArrowLeftRight className="fixed h-6 w-6" />
-          <span className="sr-only">Switch camera</span>
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>Switch Camera</DialogTitle>
-        </DialogHeader>
-        <DialogDescription>
-          <Select
-            onValueChange={(value) => {
-              setActiveDeviceId(value);
-            }}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Choose Camera" />
-            </SelectTrigger>
-            <SelectContent>
-              {devices.map((device) => (
-                <SelectItem key={device.deviceId} value={device.deviceId}>
-                  {device.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </DialogDescription>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-function Gallery() {
-  const { images, removeImage } = useCamera();
-
-  return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button
-          className="flex items-center justify-center w-16 h-10 p-2 bg-gray-800 text-white hover:bg-gray-700 transition duration-200"
-          size="icon"
-        >
-          <Images className="h-6 w-6" />
-          {images.length > 0 && <span className="ml-0 text-sm">({images.length})</span>}
-          <span className="sr-only">View gallery</span>
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[90vw] sm:max-h-[90vh]">
-        <DialogHeader>
-          <DialogTitle>{images.length} Photos</DialogTitle>
-        </DialogHeader>
-        <ScrollArea className="h-[70vh]">
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 p-4">
-            {images.map((image, index) => (
-              <div key={index} className="relative aspect-square">
-                <img
-                  src={image}
-                  alt={`captured ${index + 1}`}
-                  className="w-full h-full object-cover rounded-lg"
-                />
-                <Button
-                  className="absolute right-2 top-2 h-8 w-8 rounded-full bg-red-500 hover:bg-red-600 p-1"
-                  size="icon"
-                  onClick={() => removeImage(index)}
-                >
-                  <X className="h-4 w-4 text-white" />
-                  <span className="sr-only">Remove image</span>
-                </Button>
-              </div>
-            ))}
-          </div>
-        </ScrollArea>
-      </DialogContent>
-    </Dialog>
-  );
-}
 
 export default Camera;
