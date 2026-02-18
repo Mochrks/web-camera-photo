@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import LayoutSelector from "@/components/camera/layout-selector";
 import Camera from "@/components/camera/camera";
 import * as Layouts from "@/components/camera/photo-layouts";
@@ -20,26 +20,26 @@ export default function PhotoBooth() {
   const [isEditing, setIsEditing] = useState(false);
   const confettiRef = useRef<ConfettiRef>(null);
 
-  const handleLayoutSelect = (layoutId: number, count: number) => {
+  const handleLayoutSelect = useCallback((layoutId: number, count: number) => {
     setSelectedLayout(layoutId);
     setRequiredPhotos(count);
     setShowCamera(true);
-  };
+  }, []);
 
-  const handleCapturedImages = (images: string[]) => {
+  const handleCapturedImages = useCallback((images: string[]) => {
     setCapturedImages(images);
     setShowCamera(false);
-  };
+  }, []);
 
-  const handleLayoutSave = (dataUrl: string) => {
+  const handleLayoutSave = useCallback((dataUrl: string) => {
     setFinalImage(dataUrl);
-  };
+  }, []);
 
-  const handleStartOver = () => {
+  const handleStartOver = useCallback(() => {
     setSelectedLayout(null);
     setCapturedImages([]);
     setFinalImage(null);
-  };
+  }, []);
 
   const handlePrint = () => {
     const printWindow = window.open("", "_blank");
@@ -85,7 +85,10 @@ export default function PhotoBooth() {
         {showCamera && (
           <div className="fixed inset-0 z-[100]">
             <Camera
-              onClosed={() => setShowCamera(false)}
+              onClosed={() => {
+                setShowCamera(false);
+                setSelectedLayout(null);
+              }}
               onCapturedImages={handleCapturedImages}
               requiredPhotos={requiredPhotos}
             />
@@ -98,9 +101,9 @@ export default function PhotoBooth() {
 
         {finalImage && (
           <div className="flex flex-col items-center max-w-5xl w-full px-4 pt-10 pb-24">
-            <div className="w-full flex flex-col lg:flex-row gap-12 items-center lg:items-start justify-center">
+            <div className="w-full flex flex-col lg:flex-row gap-8 lg:gap-12 items-center lg:items-start justify-center">
               {/* Final Image Container */}
-              <div className="relative group p-3 bg-white/5 backdrop-blur-3xl rounded-[2.5rem] border border-white/10 shadow-[0_0_100px_rgba(0,0,0,0.8)] max-w-2xl w-full">
+              <div className="relative group p-2 sm:p-3 bg-white/5 backdrop-blur-3xl rounded-[2rem] sm:rounded-[2.5rem] border border-white/10 shadow-[0_0_100px_rgba(0,0,0,0.8)] max-w-2xl w-full">
                 <div className="relative w-full aspect-[4/5] sm:aspect-[3/4]">
                   <Image
                     src={finalImage}
@@ -117,11 +120,11 @@ export default function PhotoBooth() {
 
               {/* Action Menu */}
               <div className="flex flex-col gap-6 w-full max-w-md">
-                <div className="space-y-4">
-                  <h2 className="text-3xl font-black text-white italic tracking-tighter uppercase leading-none">
+                <div className="space-y-4 text-center lg:text-left">
+                  <h2 className="text-3xl sm:text-4xl font-black text-white italic tracking-tighter uppercase leading-none">
                     Studio <span className="text-indigo-500">Result</span>
                   </h2>
-                  <p className="text-white/40 text-sm font-medium tracking-tight">
+                  <p className="text-white/40 text-sm font-medium tracking-tight max-w-sm mx-auto lg:mx-0">
                     Your masterpiece is ready. Fine-tune it with filters or share it instantly with
                     the world.
                   </p>

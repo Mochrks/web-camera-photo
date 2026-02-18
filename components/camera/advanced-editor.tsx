@@ -293,7 +293,7 @@ export const AdvancedEditor: FC<AdvancedEditorProps> = ({ image, onSave, onCance
         {/* Preview Container */}
         <div className="flex-1 relative bg-neutral-950 flex items-center justify-center p-4 min-h-0">
           <div className="relative group max-w-full max-h-full">
-            <div className="relative w-full h-[60vh] md:h-[75vh] min-w-[300px]">
+            <div className="relative w-full h-[45vh] md:h-[75vh] min-w-[300px]">
               <NextImage
                 src={image}
                 alt="Preview"
@@ -315,7 +315,7 @@ export const AdvancedEditor: FC<AdvancedEditorProps> = ({ image, onSave, onCance
         </div>
 
         {/* Controls Sidebar (Desktop) / Bottom Sheet (Mobile) */}
-        <div className="w-full md:w-96 bg-black border-t md:border-t-0 md:border-l border-white/10 flex flex-col p-6 overflow-y-auto no-scrollbar pb-12">
+        <div className="w-full md:w-96 bg-black border-t md:border-t-0 md:border-l border-white/10 flex flex-col p-4 md:p-6 overflow-y-auto no-scrollbar pb-12 sm:pb-6">
           <AnimatePresence mode="wait">
             {activeTab === "adjust" ? (
               <motion.div
@@ -327,7 +327,7 @@ export const AdvancedEditor: FC<AdvancedEditorProps> = ({ image, onSave, onCance
               >
                 {/* Adjustment List */}
                 <div className="space-y-8">
-                  <div className="flex flex-wrap gap-3">
+                  <div className="flex md:grid md:grid-cols-4 md:overflow-visible flex-row overflow-x-auto no-scrollbar gap-2 md:gap-4 pb-2 -mx-2 px-2 md:mx-0 md:px-0">
                     {(["light", "color", "detail", "effects"] as AdjustmentCategory[]).map(
                       (cat) => (
                         <button
@@ -337,7 +337,7 @@ export const AdvancedEditor: FC<AdvancedEditorProps> = ({ image, onSave, onCance
                             setActiveAdjustment(ADJUSTMENTS[cat][0].id);
                           }}
                           className={cn(
-                            "px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border transition-all",
+                            "px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border transition-all whitespace-nowrap",
                             activeCategory === cat
                               ? "bg-indigo-600 border-indigo-500 text-white"
                               : "bg-white/5 border-white/10 text-white/40"
@@ -349,13 +349,13 @@ export const AdvancedEditor: FC<AdvancedEditorProps> = ({ image, onSave, onCance
                     )}
                   </div>
 
-                  <div className="grid grid-cols-4 gap-4">
+                  <div className="flex md:grid md:grid-cols-4 md:overflow-visible flex-row overflow-x-auto no-scrollbar gap-4 pb-2 -mx-2 px-2 md:mx-0 md:px-0">
                     {ADJUSTMENTS[activeCategory].map((adj) => (
                       <button
                         key={adj.id}
                         onClick={() => setActiveAdjustment(adj.id)}
                         className={cn(
-                          "flex flex-col items-center gap-2 group transition-all",
+                          "flex flex-col items-center gap-2 group transition-all shrink-0 md:shrink",
                           activeAdjustment === adj.id ? "scale-105" : "opacity-40"
                         )}
                       >
@@ -438,34 +438,34 @@ export const AdvancedEditor: FC<AdvancedEditorProps> = ({ image, onSave, onCance
                 exit={{ opacity: 0, x: -20 }}
                 className="space-y-6"
               >
-                <div className="grid grid-cols-2 gap-4">
+                <div className="flex md:grid md:grid-cols-2 md:overflow-visible flex-row overflow-x-auto no-scrollbar gap-4 pb-4 -mx-2 px-2 md:mx-0 md:px-0">
                   {PRESETS.map((preset) => (
                     <button
                       key={preset.id}
                       onClick={() => setSelectedPreset(preset.id)}
                       className={cn(
-                        "relative aspect-square rounded-3xl overflow-hidden border-2 transition-all p-1",
+                        "relative w-28 md:w-auto aspect-[3/4] shrink-0 md:shrink-0 rounded-2xl overflow-hidden border-2 transition-all p-1",
                         selectedPreset === preset.id
                           ? "border-indigo-600 bg-indigo-600/20"
-                          : "border-white/5 bg-white/5 hover:border-white/20"
+                          : "border-white/5 bg-white/5"
                       )}
                     >
-                      <div className="w-full h-full rounded-2xl overflow-hidden relative">
+                      <div className="w-full h-full rounded-xl overflow-hidden relative">
                         <NextImage
                           src={image}
                           alt={preset.name}
                           fill
                           unoptimized
                           style={{ filter: preset.filter }}
-                          className="object-contain bg-black/40"
+                          className="object-cover bg-black"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
-                        <span className="absolute bottom-3 left-3 text-[10px] font-black text-white uppercase tracking-wider">
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                        <span className="absolute bottom-2 left-2 right-2 text-[8px] font-black text-white uppercase tracking-wider text-center leading-tight">
                           {preset.name}
                         </span>
                         {selectedPreset === preset.id && (
-                          <div className="absolute top-2 right-2 w-5 h-5 bg-white rounded-full flex items-center justify-center">
-                            <Check className="w-3 h-3 text-indigo-600 stroke-[4px]" />
+                          <div className="absolute top-1.5 right-1.5 w-4 h-4 bg-white rounded-full flex items-center justify-center">
+                            <Check className="w-2.5 h-2.5 text-indigo-600 stroke-[4px]" />
                           </div>
                         )}
                       </div>

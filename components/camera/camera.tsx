@@ -27,6 +27,7 @@ const Camera: FC<CameraProps> = ({ onClosed, onCapturedImages, requiredPhotos })
   const [showGrid, setShowGrid] = useState(false);
   const [timerCount, setTimerCount] = useState(0);
   const [flashMode, setFlashMode] = useState<"auto" | "on" | "off">("auto");
+  const [lastPhoto, setLastPhoto] = useState<string | null>(null);
 
   useEffect(() => {
     resetImages();
@@ -41,18 +42,18 @@ const Camera: FC<CameraProps> = ({ onClosed, onCapturedImages, requiredPhotos })
       setTimeout(() => {
         const imageData = camera.current?.takePhoto();
         if (imageData) {
+          setLastPhoto(imageData);
+          setTimeout(() => setLastPhoto(null), 800);
+
           // Store locally in sessionImages for immediate result passing
           setSessionImages((prev) => {
             const updated = [...prev, imageData];
-
-            // Sync with global provider too
             addImage(imageData);
 
             if (updated.length === requiredPhotos) {
-              // End session immediately after last shot is clear
               setTimeout(() => {
                 onCapturedImages(updated);
-              }, 500);
+              }, 1200); // Wait for animation to finish
             }
             return updated;
           });
@@ -60,24 +61,32 @@ const Camera: FC<CameraProps> = ({ onClosed, onCapturedImages, requiredPhotos })
           setPhotoCount((prev) => prev + 1);
         }
         setShowFlash(false);
-      }, 100);
+      }, 50);
     }
   }, [flashMode, addImage, requiredPhotos, onCapturedImages]);
 
+  // Use a ref for the latest capture function to avoid effect dependency issues
+  const capturePhotoRef = useRef(capturePhoto);
   useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (timerCount > 0) {
-      timer = setTimeout(() => {
-        if (timerCount === 1) {
-          capturePhoto();
-          setTimerCount(0);
-        } else {
-          setTimerCount(timerCount - 1);
-        }
+    capturePhotoRef.current = capturePhoto;
+  }, [capturePhoto]);
+
+  const isTimerRunning = timerCount > 0;
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isTimerRunning) {
+      interval = setInterval(() => {
+        setTimerCount((prev) => {
+          if (prev <= 1) {
+            capturePhotoRef.current();
+            return 0;
+          }
+          return prev - 1;
+        });
       }, 1000);
     }
-    return () => clearTimeout(timer);
-  }, [timerCount, capturePhoto]);
+    return () => clearInterval(interval);
+  }, [isTimerRunning]);
 
   const handleCapture = () => {
     if (photoCount < requiredPhotos && timerCount === 0) {
@@ -100,8 +109,37 @@ const Camera: FC<CameraProps> = ({ onClosed, onCapturedImages, requiredPhotos })
       <div className="absolute inset-0 z-0">
         <CameraView ref={camera} />
 
-        {/* Simple Flash Overlay */}
-        {showFlash && <div className="absolute inset-0 bg-white z-[120] opacity-100" />}
+        {/* Flash & Shutter Effects */}
+        <AnimatePresence>
+          {showFlash && (
+            <motion.div
+              initial={{ opacity: 1 }}
+              animate={{ opacity: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="absolute inset-0 bg-white z-[120] pointer-events-none"
+            />
+          )}
+
+          {lastPhoto && (
+            <motion.div
+              initial={{ scale: 1.2, opacity: 1, rotate: 0 }}
+              animate={{
+                scale: 0.1,
+                x: -300,
+                y: 400,
+                opacity: 0,
+                rotate: -20,
+              }}
+              transition={{ duration: 0.8, ease: "circIn" }}
+              className="absolute inset-0 z-[115] flex items-center justify-center pointer-events-none"
+            >
+              <div className="relative w-[300px] aspect-[3/4] border-[12px] border-white shadow-[0_0_100px_rgba(0,0,0,0.5)] rounded-lg overflow-hidden">
+                <img src={lastPhoto} className="w-full h-full object-cover" />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Static Grid Overlay */}
         {showGrid && (
@@ -138,15 +176,42 @@ const Camera: FC<CameraProps> = ({ onClosed, onCapturedImages, requiredPhotos })
             <Zap className={cn("h-4 w-4", flashMode === "on" && "fill-current")} />
           </button>
 
-          <button
-            onClick={() => setTimerActive(!timerActive)}
-            className={cn(
-              "w-10 h-10 flex items-center justify-center rounded-full transition-all",
-              timerActive ? "text-yellow-400 bg-yellow-400/20" : "text-white bg-white/10"
+          <div className="flex items-center gap-2">
+            {!timerActive ? (
+              <button
+                onClick={() => {
+                  setTimerActive(true);
+                  setTimerDuration(3);
+                }}
+                className="w-10 h-10 flex items-center justify-center rounded-full transition-all text-white bg-white/10"
+              >
+                <Timer className="h-4 w-4" />
+              </button>
+            ) : (
+              <div className="flex items-center bg-yellow-400/20 rounded-full p-1 border border-yellow-400/20">
+                {[3, 5, 10].map((t) => (
+                  <button
+                    key={t}
+                    onClick={() => setTimerDuration(t)}
+                    className={cn(
+                      "px-3 py-1.5 rounded-full text-[10px] font-black transition-all",
+                      timerDuration === t
+                        ? "bg-yellow-400 text-black"
+                        : "text-yellow-400/60 hover:text-yellow-400"
+                    )}
+                  >
+                    {t}s
+                  </button>
+                ))}
+                <button
+                  onClick={() => setTimerActive(false)}
+                  className="px-3 py-1.5 rounded-full text-[10px] font-black text-white/40 hover:text-white"
+                >
+                  OFF
+                </button>
+              </div>
             )}
-          >
-            <Timer className="h-4 w-4" />
-          </button>
+          </div>
 
           <button
             onClick={() => setShowGrid(!showGrid)}
@@ -176,7 +241,7 @@ const Camera: FC<CameraProps> = ({ onClosed, onCapturedImages, requiredPhotos })
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.8, opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="text-[12rem] font-black text-white"
+              className="text-[6rem] sm:text-[12rem] font-black text-white"
             >
               {timerCount}
             </motion.span>
@@ -185,7 +250,7 @@ const Camera: FC<CameraProps> = ({ onClosed, onCapturedImages, requiredPhotos })
       </div>
 
       {/* Simplified Bottom Bar */}
-      <div className="relative h-64 flex flex-col items-center justify-center px-10 z-50 bg-black/60 pb-10">
+      <div className="relative h-48 sm:h-64 flex flex-col items-center justify-center px-6 sm:px-10 z-50 bg-black/60 pb-8 sm:pb-10">
         <div className="w-full max-w-lg flex items-center justify-between gap-8">
           {/* Gallery Preview */}
           <div className="w-16 h-16 rounded-full border border-white/20 bg-neutral-900 overflow-hidden">
@@ -209,7 +274,7 @@ const Camera: FC<CameraProps> = ({ onClosed, onCapturedImages, requiredPhotos })
           <button
             onClick={handleCapture}
             disabled={photoCount === requiredPhotos || timerCount > 0}
-            className="relative w-24 h-24 flex items-center justify-center group"
+            className="relative w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center group"
           >
             <div className="absolute inset-0 rounded-full border-[4px] border-white transition-all group-active:scale-90" />
             <div

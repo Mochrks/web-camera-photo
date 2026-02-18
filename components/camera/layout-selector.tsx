@@ -22,27 +22,27 @@ const LayoutSelector: React.FC<LayoutSelectorProps> = ({ onSelect }) => {
   const layouts = [
     {
       id: 1,
-      name: "Classic Vertical",
+      name: "Wedding Elegance",
       count: 3,
-      tag: "Classic",
-      icon: Film,
-      desc: "3 vertical slots for a timeless feel",
+      tag: "Wedding",
+      icon: Heart,
+      desc: "Luxury white & gold floral theme",
     },
     {
       id: 2,
-      name: "Modern Grid",
+      name: "Spotify Viral",
       count: 4,
-      tag: "Pro",
-      icon: LayoutIcon,
-      desc: "2x2 grid for dynamic shots",
+      tag: "Music",
+      icon: Film,
+      desc: "Iconic music player interface",
     },
     {
       id: 3,
-      name: "Retro Polaroid",
+      name: "Birthday Party",
       count: 3,
-      tag: "Vintage",
-      icon: ImageIcon,
-      desc: "Overlapping frames with vintage border",
+      tag: "Birthday",
+      icon: Sparkles,
+      desc: "Festive blue with confetti effect",
     },
     {
       id: 4,
@@ -62,19 +62,19 @@ const LayoutSelector: React.FC<LayoutSelectorProps> = ({ onSelect }) => {
     },
     {
       id: 6,
-      name: "Vintage Film",
+      name: "Graduation Day",
       count: 3,
-      tag: "Retro",
-      icon: Film,
-      desc: "Film strip style horizontal shots",
+      tag: "Success",
+      icon: Star,
+      desc: "Classic black & gold achievement",
     },
     {
       id: 7,
-      name: "Pastel 4-Cut",
+      name: "Korean Photoism",
       count: 4,
-      tag: "Korean",
+      tag: "Photoism",
       icon: Heart,
-      desc: "Trendy Korean style 4-cut strip",
+      desc: "Authentic soft rainbow self-studio",
     },
     {
       id: 8,
@@ -94,11 +94,11 @@ const LayoutSelector: React.FC<LayoutSelectorProps> = ({ onSelect }) => {
     },
     {
       id: 10,
-      name: "Y2K Sparkle",
+      name: "Y2K Futuro",
       count: 3,
-      tag: "Y2K",
-      icon: Sparkles,
-      desc: "Retro gradients and glitter effects",
+      tag: "Cyber",
+      icon: Zap,
+      desc: "Metallic silver scanline aesthetic",
     },
     {
       id: 11,
@@ -174,16 +174,110 @@ const LayoutSelector: React.FC<LayoutSelectorProps> = ({ onSelect }) => {
     },
     {
       id: 20,
-      name: "News Retro",
+      name: "VOGUE Magazine",
       count: 3,
-      tag: "Classic",
+      tag: "Editorial",
       icon: ImageIcon,
-      desc: "Old newspaper style aged finish",
+      desc: "High-end fashion cover layout",
     },
   ];
 
+  const LayoutPreview = ({ id, count }: { id: number; count: number }) => {
+    // Generate mini skeletons based on layout ID
+    const renderSkeleton = () => {
+      switch (id) {
+        case 1: // Wedding
+          return (
+            <div className="flex flex-col gap-1.5 w-full h-full p-4 bg-white/10">
+              <div className="absolute inset-0 border-4 border-[#D4AF37]/30" />
+              {[...Array(count)].map((_, i) => (
+                <div key={i} className="flex-1 bg-white/20 rounded-sm border border-[#D4AF37]/20" />
+              ))}
+            </div>
+          );
+        case 2: // Spotify
+          return (
+            <div className="flex flex-col gap-2 w-full h-full p-4 bg-[#121212]">
+              <div className="grid grid-cols-2 gap-1.5 flex-1">
+                {[...Array(count)].map((_, i) => (
+                  <div key={i} className="bg-white/5 rounded-sm" />
+                ))}
+              </div>
+              <div className="h-1 w-full bg-[#1db954]/40 rounded-full" />
+              <div className="h-4 w-2/3 bg-white/10 rounded-sm" />
+            </div>
+          );
+        case 3: // Birthday
+          return (
+            <div className="flex flex-col gap-1.5 w-full h-full p-4 bg-blue-500/20">
+              {[...Array(count)].map((_, i) => (
+                <div
+                  key={i}
+                  className="flex-1 bg-white/20 rounded-sm border border-white/10 relative overflow-hidden"
+                >
+                  <div className="absolute top-0 right-0 w-4 h-4 bg-yellow-400/20 rounded-full" />
+                </div>
+              ))}
+            </div>
+          );
+        case 6: // Graduation
+          return (
+            <div className="flex flex-col gap-1.5 w-full h-full p-4 bg-black/40">
+              <div className="absolute top-0 w-full h-8 bg-[#D4AF37]/30" />
+              {[...Array(count)].map((_, i) => (
+                <div key={i} className="flex-1 bg-white/5 rounded-sm border border-[#D4AF37]/20" />
+              ))}
+            </div>
+          );
+        case 7: // Korean Photoism
+          return (
+            <div className="flex flex-col gap-1.5 w-full h-full p-4 bg-gradient-to-b from-orange-100/20 to-blue-100/20">
+              {[...Array(count)].map((_, i) => (
+                <div key={i} className="flex-1 bg-white/40 rounded-sm" />
+              ))}
+            </div>
+          );
+        case 10: // Y2K
+          return (
+            <div className="flex gap-2 w-full h-full p-4 bg-slate-800/40">
+              {[...Array(count)].map((_, i) => (
+                <div
+                  key={i}
+                  className="flex-1 bg-white/5 rounded-sm border border-cyan-400/30 shadow-[0_0_10px_rgba(34,211,238,0.2)]"
+                />
+              ))}
+            </div>
+          );
+        case 20: // Vogue
+          return (
+            <div className="flex flex-col gap-4 w-full h-full p-6 bg-[#f5f5f7]">
+              <div className="h-8 w-full bg-black/10 rounded-sm flex items-center justify-center text-[10px] font-serif text-black/40">
+                V O G U E
+              </div>
+              <div className="flex-1 bg-black/5 rounded-sm border border-black/5" />
+            </div>
+          );
+        default:
+          return (
+            <div className="flex gap-1.5 w-full h-full p-4">
+              {[...Array(count)].map((_, i) => (
+                <div key={i} className="flex-1 bg-white/10 rounded-md border border-white/5" />
+              ))}
+            </div>
+          );
+      }
+    };
+
+    return (
+      <div className="h-full w-full relative group-hover:scale-105 transition-transform duration-500">
+        {renderSkeleton()}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+      </div>
+    );
+  };
+
   return (
-    <div className="w-full min-h-screen flex flex-col items-center p-6 gap-12 mt-20 sm:mt-0 relative overflow-x-hidden">
+    <div className="w-full min-h-screen flex flex-col items-center p-6 gap-8 sm:gap-12 mt-12 sm:mt-0 relative overflow-x-hidden">
       <div className="absolute inset-0 bg-dots opacity-5 pointer-events-none" />
 
       <div className="text-center z-10 space-y-4 max-w-2xl">
@@ -195,7 +289,7 @@ const LayoutSelector: React.FC<LayoutSelectorProps> = ({ onSelect }) => {
           <Sparkles className="w-3 h-3" />
           <span>Choose Your Frame</span>
         </motion.div>
-        <h1 className="text-5xl md:text-7xl font-black text-white tracking-tighter uppercase italic leading-[0.9]">
+        <h1 className="text-4xl sm:text-5xl md:text-7xl font-black text-white tracking-tighter uppercase italic leading-[0.9]">
           SELECT <span className="text-indigo-500">STYLE</span>
         </h1>
         <p className="text-neutral-500 text-sm font-medium tracking-tight">
@@ -214,12 +308,16 @@ const LayoutSelector: React.FC<LayoutSelectorProps> = ({ onSelect }) => {
             onClick={() => onSelect(layout.id, layout.count)}
             className="group relative bg-white/5 backdrop-blur-sm rounded-[2rem] p-5 border border-white/5 hover:border-indigo-500/50 hover:bg-white/[0.08] transition-all text-left flex flex-col gap-4 overflow-hidden"
           >
-            {/* Preview Skeleton Replacement */}
-            <div className="h-40 w-full rounded-2xl bg-neutral-900/50 flex items-center justify-center relative overflow-hidden group-hover:bg-neutral-800/50 transition-colors">
-              <layout.icon className="w-12 h-12 text-white/10 group-hover:text-indigo-500/30 transition-all group-hover:scale-110" />
-              <div className="absolute top-3 right-3 px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-[8px] font-black text-white/40 uppercase">
-                {layout.count} Shots
+            {/* Visual Layout Preview */}
+            <div className="h-44 w-full rounded-2xl bg-neutral-900/80 border border-white/5 flex items-center justify-center relative overflow-hidden group-hover:bg-neutral-800/80 transition-all duration-300">
+              <LayoutPreview id={layout.id} count={layout.count} />
+
+              <div className="absolute top-4 right-4 px-2 py-1 rounded-lg bg-indigo-600/90 text-[8px] font-black text-white uppercase tracking-widest shadow-lg transform rotate-2">
+                {layout.count} SHOTS
               </div>
+
+              {/* Decorative Glow */}
+              <div className="absolute -bottom-10 -right-10 w-24 h-24 bg-indigo-600/20 blur-[30px] rounded-full group-hover:bg-indigo-500/40 transition-colors" />
             </div>
 
             <div className="space-y-1">

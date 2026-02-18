@@ -57,7 +57,7 @@ const BaseLayout: React.FC<
   );
 };
 
-// 1. Classic Vertical (3)
+// 1. Wedding Elegance (3)
 export const Layout1: React.FC<LayoutProps> = (props) => (
   <BaseLayout
     {...props}
@@ -65,81 +65,178 @@ export const Layout1: React.FC<LayoutProps> = (props) => (
     width={600}
     height={900}
     draw={async (ctx, canvas) => {
-      ctx.fillStyle = props.backgroundColor || "#FF5733";
+      // Elegant White/Gold Background
+      ctx.fillStyle = "#fff";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-      drawText(ctx, "PHOTO BOOTH", canvas.width / 2, 60, "bold 40px Arial", "#fff");
-      for (let i = 0; i < 3; i++) {
-        const y = 100 + i * 260;
-        drawFrame(ctx, 45, y - 5, 510, 240, "#fff", 10);
-        await drawImage(ctx, props.images[i], 50, y, 500, 230);
-      }
-      drawText(ctx, new Date().toLocaleDateString(), 60, 860, "20px Arial", "#fff", "left");
-    }}
-  />
-);
 
-// 2. Modern Grid (4)
-export const Layout2: React.FC<LayoutProps> = (props) => (
-  <BaseLayout
-    {...props}
-    id={2}
-    width={800}
-    height={800}
-    draw={async (ctx, canvas) => {
-      ctx.fillStyle = props.backgroundColor || "#111";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      const size = 360;
-      const positions = [
-        { x: 30, y: 30 },
-        { x: 410, y: 30 },
-        { x: 30, y: 410 },
-        { x: 410, y: 410 },
-      ];
-      for (let i = 0; i < 4; i++) {
-        if (props.images[i]) {
-          drawFrame(ctx, positions[i].x - 5, positions[i].y - 5, size + 10, size + 10, "#fff", 5);
-          await drawImage(ctx, props.images[i], positions[i].x, positions[i].y, size, size);
-        }
+      // Gold Border
+      ctx.strokeStyle = "#D4AF37";
+      ctx.lineWidth = 20;
+      ctx.strokeRect(10, 10, canvas.width - 20, canvas.height - 20);
+
+      // Inner thin border
+      ctx.lineWidth = 2;
+      ctx.strokeRect(30, 30, canvas.width - 60, canvas.height - 60);
+
+      // Floral/Decorative corners (simple circles/lines representing ornament)
+      ctx.fillStyle = "#D4AF37";
+      [
+        [40, 40],
+        [canvas.width - 40, 40],
+        [40, canvas.height - 40],
+        [canvas.width - 40, canvas.height - 40],
+      ].forEach(([x, y]) => {
+        ctx.beginPath();
+        ctx.arc(x, y, 15, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      drawText(ctx, "Our Wedding", canvas.width / 2, 80, "italic bold 45px Serif", "#D4AF37");
+
+      for (let i = 0; i < 3; i++) {
+        const y = 130 + i * 230;
+        // Frame for each photo
+        drawFrame(ctx, 45, y - 5, 510, 220, "#D4AF37", 2);
+        await drawImage(ctx, props.images[i], 50, y, 500, 210);
       }
+
       drawText(
         ctx,
-        "STUDIO MOMENTS",
+        "THANK YOU FOR CELEBRATING WITH US",
         canvas.width / 2,
-        canvas.height - 20,
-        "bold 20px Arial",
-        "#fff"
+        860,
+        "12px Serif",
+        "#D4AF37"
       );
     }}
   />
 );
 
-// 3. Retro Polaroid (3) - Overlapping
+// 2. Spotify Viral (4)
+export const Layout2: React.FC<LayoutProps> = (props) => (
+  <BaseLayout
+    {...props}
+    id={2}
+    width={600}
+    height={900}
+    draw={async (ctx, canvas) => {
+      // Spotify Dark Theme
+      ctx.fillStyle = "#121212";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Blurred BG from first image
+      if (props.images[0]) {
+        await drawImage(ctx, props.images[0], -50, -50, 700, 1000, 0, { saturation: 50 });
+        ctx.fillStyle = "rgba(18, 18, 18, 0.85)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
+
+      // Main Artwork (Grid of 4)
+      const size = 260;
+      const positions = [
+        { x: 30, y: 70 },
+        { x: 310, y: 70 },
+        { x: 30, y: 350 },
+        { x: 310, y: 350 },
+      ];
+      for (let i = 0; i < 4; i++) {
+        if (props.images[i]) {
+          await drawImage(ctx, props.images[i], positions[i].x, positions[i].y, size, size);
+        }
+      }
+
+      // Player Controls
+      const playerY = 700;
+      drawText(ctx, "Redefine Moments", 50, playerY, "bold 32px Helvetica", "#fff", "left");
+      drawText(ctx, "The Studio Session", 50, playerY + 40, "18px Helvetica", "#b3b3b3", "left");
+
+      // Progress Bar
+      ctx.fillStyle = "#4f4f4f";
+      ctx.roundRect?.(50, playerY + 80, 500, 4, 2);
+      ctx.fill();
+      ctx.fillStyle = "#1db954"; // Spotify Green
+      ctx.roundRect?.(50, playerY + 80, 200, 4, 2);
+      ctx.fill();
+
+      // Time
+      drawText(ctx, "1:24", 50, playerY + 105, "12px Helvetica", "#b3b3b3", "left");
+      drawText(ctx, "3:45", 550, playerY + 105, "12px Helvetica", "#b3b3b3", "right");
+
+      // Buttons (Shapes)
+      ctx.fillStyle = "#fff";
+      // Play icon (Triangle)
+      ctx.beginPath();
+      ctx.moveTo(canvas.width / 2 + 15, playerY + 140);
+      ctx.lineTo(canvas.width / 2 - 10, playerY + 125);
+      ctx.lineTo(canvas.width / 2 - 10, playerY + 155);
+      ctx.fill();
+
+      // Prev/Next
+      ctx.beginPath();
+      ctx.moveTo(canvas.width / 2 - 60, playerY + 140);
+      ctx.lineTo(canvas.width / 2 - 40, playerY + 130);
+      ctx.lineTo(canvas.width / 2 - 40, playerY + 150);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(canvas.width / 2 + 60, playerY + 140);
+      ctx.lineTo(canvas.width / 2 + 40, playerY + 130);
+      ctx.lineTo(canvas.width / 2 + 40, playerY + 150);
+      ctx.fill();
+    }}
+  />
+);
+
+// 3. Birthday Celebration (3)
 export const Layout3: React.FC<LayoutProps> = (props) => (
   <BaseLayout
     {...props}
     id={3}
-    width={800}
-    height={600}
+    width={600}
+    height={900}
     draw={async (ctx, canvas) => {
-      ctx.fillStyle = props.backgroundColor || "#f4f4f4";
+      // Festive Blue Gradient
+      const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      grad.addColorStop(0, "#4facfe");
+      grad.addColorStop(1, "#00f2fe");
+      ctx.fillStyle = grad;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-      const rots = [-0.1, 0.05, -0.05];
-      const pos = [
-        { x: 50, y: 100 },
-        { x: 250, y: 80 },
-        { x: 450, y: 120 },
-      ];
-      for (let i = 0; i < 3; i++) {
-        ctx.save();
-        ctx.translate(pos[i].x + 150, pos[i].y + 180);
-        ctx.rotate(rots[i]);
-        ctx.fillStyle = "white";
-        ctx.shadowBlur = 20;
-        ctx.shadowColor = "rgba(0,0,0,0.2)";
-        ctx.fillRect(-160, -170, 320, 380);
-        await drawImage(ctx, props.images[i], -150, -160, 300, 300);
-        ctx.restore();
+
+      // Bunting/Confetti
+      for (let i = 0; i < 30; i++) {
+        ctx.fillStyle = ["#ff4081", "#ffd740", "#b2ff59", "#ffffff"][Math.floor(Math.random() * 4)];
+        ctx.beginPath();
+        ctx.arc(
+          Math.random() * canvas.width,
+          Math.random() * canvas.height,
+          Math.random() * 10,
+          0,
+          Math.PI * 2
+        );
+        ctx.fill();
       }
+
+      // Banner Area
+      ctx.fillStyle = "rgba(255,255,255,0.9)";
+      ctx.fillRect(0, 0, canvas.width, 100);
+      drawText(
+        ctx,
+        "HAPPY BIRTHDAY!",
+        canvas.width / 2,
+        65,
+        "black italic 900 40px Courier",
+        "#333"
+      );
+
+      for (let i = 0; i < 3; i++) {
+        const y = 130 + i * 240;
+        ctx.fillStyle = "white";
+        ctx.fillRect(35, y - 5, 530, 220);
+        await drawImage(ctx, props.images[i], 40, y, 520, 210);
+      }
+
+      // Bottom Message
+      ctx.fillStyle = "#fff";
+      drawText(ctx, "Let's Party!", canvas.width / 2, 875, "bold 24px Arial", "#fff");
     }}
   />
 );
@@ -184,48 +281,73 @@ export const Layout5: React.FC<LayoutProps> = (props) => (
   />
 );
 
-// 6. Vintage Film (3)
+// 6. Graduation Day (3)
 export const Layout6: React.FC<LayoutProps> = (props) => (
   <BaseLayout
     {...props}
     id={6}
-    width={900}
-    height={350}
+    width={600}
+    height={900}
     draw={async (ctx, canvas) => {
-      ctx.fillStyle = "#111";
+      // Classic Black & Gold Graduation
+      ctx.fillStyle = "#1a1a1a";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-      for (let i = 0; i < 3; i++) {
-        await drawImage(ctx, props.images[i], 40 + i * 280, 40, 260, 260);
-        // Sprocket holes
-        ctx.fillStyle = "#fff";
-        for (let j = 0; j < 10; j++) {
-          ctx.fillRect(40 + i * 280 + j * 26, 10, 10, 15);
-          ctx.fillRect(40 + i * 280 + j * 26, 325, 10, 15);
-        }
+
+      // Glitter particles
+      for (let i = 0; i < 100; i++) {
+        ctx.fillStyle = i % 2 === 0 ? "#D4AF37" : "#fff";
+        ctx.globalAlpha = 0.5;
+        ctx.fillRect(Math.random() * canvas.width, Math.random() * canvas.height, 2, 2);
       }
+      ctx.globalAlpha = 1;
+
+      // Top Banner
+      ctx.fillStyle = "#D4AF37";
+      ctx.fillRect(0, 20, canvas.width, 100);
+      drawText(ctx, "CONGRATS GRAD!", canvas.width / 2, 85, "bold 50px Arial Black", "#fff");
+
+      for (let i = 0; i < 3; i++) {
+        const y = 150 + i * 230;
+        ctx.strokeStyle = "#D4AF37";
+        ctx.lineWidth = 10;
+        ctx.strokeRect(45, y - 5, 510, 220);
+        await drawImage(ctx, props.images[i], 50, y, 500, 210);
+      }
+
+      drawText(ctx, "CLASS OF 2024", canvas.width / 2, 870, "bold 30px Arial", "#D4AF37");
     }}
   />
 );
 
-// 7. Pastel 4-Cut (4)
+// 7. Korean Photoism (4)
 export const Layout7: React.FC<LayoutProps> = (props) => (
   <BaseLayout
     {...props}
     id={7}
-    width={500}
-    height={1100}
+    width={480}
+    height={1200}
     draw={async (ctx, canvas) => {
-      ctx.fillStyle = "#f0e6ff"; // Pastel purple
+      // Soft Rainbow Gradient Background
+      const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      grad.addColorStop(0, "#fdfcfb");
+      grad.addColorStop(0.5, "#e2d1c3");
+      grad.addColorStop(1, "#fdfcfb");
+      ctx.fillStyle = grad;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
+
       for (let i = 0; i < 4; i++) {
         if (props.images[i]) {
-          const y = 40 + i * 250;
+          const y = 50 + i * 270;
+          // Thin white border
           ctx.fillStyle = "white";
-          ctx.fillRect(35, y - 5, 430, 240);
-          await drawImage(ctx, props.images[i], 40, y, 420, 230);
+          ctx.fillRect(35, y - 5, 410, 240);
+          await drawImage(ctx, props.images[i], 40, y, 400, 230);
         }
       }
-      drawText(ctx, "LIFE FOUR CUTS", canvas.width / 2, 1060, "bold 24px Serif", "#9b87f5");
+
+      // Branding
+      drawText(ctx, "P H O T O I S M", canvas.width / 2, 1140, "bold 16px Arial", "#888");
+      drawText(ctx, "STUDIO SELF PORTRAIT", canvas.width / 2, 1165, "10px Arial", "#aaa");
     }}
   />
 );
@@ -294,7 +416,7 @@ export const Layout9: React.FC<LayoutProps> = (props) => (
   />
 );
 
-// 10. Y2K Sparkle (3)
+// 10. Y2K Futuro (3)
 export const Layout10: React.FC<LayoutProps> = (props) => (
   <BaseLayout
     {...props}
@@ -302,14 +424,28 @@ export const Layout10: React.FC<LayoutProps> = (props) => (
     width={900}
     height={400}
     draw={async (ctx, canvas) => {
-      applyGradient(ctx, canvas.width, canvas.height, ["#a18cd1", "#fbc2eb", "#fad0c4"]);
+      // Metallic Silver Gradient
+      const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+      grad.addColorStop(0, "#bdc3c7");
+      grad.addColorStop(0.5, "#2c3e50");
+      grad.addColorStop(1, "#bdc3c7");
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Scanline effect
+      ctx.fillStyle = "rgba(0,0,0,0.1)";
+      for (let i = 0; i < canvas.height; i += 4) {
+        ctx.fillRect(0, i, canvas.width, 1);
+      }
+
       for (let i = 0; i < 3; i++) {
-        ctx.shadowBlur = 20;
-        ctx.shadowColor = "rgba(255,255,255,0.5)";
-        await drawImage(ctx, props.images[i], 40 + i * 280, 40, 260, 320);
-        drawText(ctx, "✨", 40 + i * 280, 30, "20px Arial", "#fff");
+        ctx.shadowBlur = 30;
+        ctx.shadowColor = "#00ffff";
+        await drawImage(ctx, props.images[i], 40 + i * 285, 40, 260, 320);
+        drawFrame(ctx, 40 + i * 285, 40, 260, 320, "#00ffff", 2);
       }
       ctx.shadowBlur = 0;
+      drawText(ctx, "SYSTEM: READY // Y2K_CORE", 50, 380, "bold 12px Monospace", "#00ffff", "left");
     }}
   />
 );
@@ -533,7 +669,7 @@ export const Layout19: React.FC<LayoutProps> = (props) => (
   />
 );
 
-// 20. News Retro (3)
+// 20. Magazine Cover (3)
 export const Layout20: React.FC<LayoutProps> = (props) => (
   <BaseLayout
     {...props}
@@ -541,26 +677,35 @@ export const Layout20: React.FC<LayoutProps> = (props) => (
     width={700}
     height={1000}
     draw={async (ctx, canvas) => {
-      ctx.fillStyle = "#f4ecd8"; // Old paper
+      // High-end Beige Background
+      ctx.fillStyle = "#f5f5f7";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-      drawText(ctx, "DAILY CAPTURE", canvas.width / 2, 80, "bold 70px Times New Roman", "#222");
-      ctx.fillRect(40, 100, 620, 5);
-      for (let i = 0; i < 3; i++) {
-        const y = 140 + i * 260;
-        // Draw in grayscale simulation by drawing and then applying filter if needed
-        // but the drawImage filters can handle it!
-        await drawImage(ctx, props.images[i], 50, y, 600, 230, 0, { saturation: -100 });
-        drawText(
-          ctx,
-          "LOREM IPSUM DOLOR SIT AMET",
-          50,
-          y + 250,
-          "italic 12px Times New Roman",
-          "#222",
-          "left"
-        );
+
+      // Main large photo background (blurred)
+      if (props.images[0]) {
+        await drawImage(ctx, props.images[0], 0, 0, 700, 1000, 0, {
+          saturation: -20,
+          brightness: 110,
+        });
       }
-      ctx.fillRect(40, 930, 620, 2);
+
+      // Title
+      ctx.save();
+      ctx.letterSpacing = "15px";
+      drawText(ctx, "V O G U E", canvas.width / 2, 120, "italic bold 100px Serif", "#000");
+      ctx.restore();
+
+      // Photos as side features
+      for (let i = 0; i < 3; i++) {
+        const y = 200 + i * 250;
+        ctx.shadowBlur = 40;
+        ctx.shadowColor = "rgba(0,0,0,0.3)";
+        await drawImage(ctx, props.images[i], 100, y, 500, 220);
+      }
+
+      ctx.shadowBlur = 0;
+      drawText(ctx, "THE FUTURE OF STYLE", 50, 950, "bold 14px Arial", "#000", "left");
+      drawText(ctx, "ISSUE NO. 01 / 2024", 650, 950, "12px Arial", "#000", "right");
     }}
   />
 );

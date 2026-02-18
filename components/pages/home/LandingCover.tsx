@@ -36,10 +36,10 @@ export function LandingCover({ onStart }: LandingCoverProps) {
           transition={{ duration: 0.8 }}
           className="mb-6 relative"
         >
-          <h1 className="text-8xl md:text-9xl font-black text-white tracking-tighter leading-[0.95] italic uppercase ">
+          <h1 className="text-6xl md:text-8xl lg:text-9xl font-black text-white tracking-tighter leading-[0.95] italic uppercase ">
             REDEFINE <br />
           </h1>
-          <h1 className="text-8xl md:text-9xl font-black text-white tracking-tighter leading-[0.95] italic uppercase ">
+          <h1 className="text-6xl md:text-8xl lg:text-9xl font-black text-white tracking-tighter leading-[0.95] italic uppercase ">
             MOMENTS <br />
           </h1>
 
