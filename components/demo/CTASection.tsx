@@ -21,12 +21,12 @@ export default function CTASection() {
 
           <div className="relative z-10 max-w-3xl mx-auto flex flex-col items-center gap-8">
             <h2 className="text-5xl md:text-7xl font-black text-white leading-none uppercase tracking-tighter italic">
-              LET'S SHOOT <br />
+              LET&apos;S SHOOT <br />
               SOMETHING GREAT
             </h2>
             <p className="text-indigo-100 text-lg md:text-xl font-medium leading-relaxed opacity-90">
-              Whether it's a warehouse party in London or a corporate gala in Tokyo, we bring the
-              studio to you. Book your date now.
+              Whether it&apos;s a warehouse party in London or a corporate gala in Tokyo, we bring
+              the studio to you. Book your date now.
             </p>
 
             <div className="flex flex-wrap items-center justify-center gap-4">

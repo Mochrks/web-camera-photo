@@ -23,6 +23,7 @@ import {
   Camera,
   Check,
 } from "lucide-react";
+import NextImage from "next/image";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
@@ -214,7 +215,7 @@ export const AdvancedEditor: FC<AdvancedEditorProps> = ({ image, onSave, onCance
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const img = new Image();
+    const img = new window.Image();
     img.crossOrigin = "anonymous";
     img.src = image;
 
@@ -292,12 +293,16 @@ export const AdvancedEditor: FC<AdvancedEditorProps> = ({ image, onSave, onCance
         {/* Preview Container */}
         <div className="flex-1 relative bg-neutral-950 flex items-center justify-center p-4 min-h-0">
           <div className="relative group max-w-full max-h-full">
-            <img
-              src={image}
-              alt="Preview"
-              style={{ filter: getFilterString() }}
-              className="max-w-full max-h-[60vh] md:max-h-[75vh] object-contain rounded-lg shadow-[0_0_50px_rgba(0,0,0,0.5)] transition-all"
-            />
+            <div className="relative w-full h-[60vh] md:h-[75vh] min-w-[300px]">
+              <NextImage
+                src={image}
+                alt="Preview"
+                fill
+                unoptimized
+                style={{ filter: getFilterString() }}
+                className="object-contain rounded-lg shadow-[0_0_50px_rgba(0,0,0,0.5)] transition-all"
+              />
+            </div>
             {values.vignette > 0 && (
               <div
                 className="absolute inset-0 pointer-events-none rounded-lg"
@@ -446,11 +451,13 @@ export const AdvancedEditor: FC<AdvancedEditorProps> = ({ image, onSave, onCance
                       )}
                     >
                       <div className="w-full h-full rounded-2xl overflow-hidden relative">
-                        <img
+                        <NextImage
                           src={image}
                           alt={preset.name}
+                          fill
+                          unoptimized
                           style={{ filter: preset.filter }}
-                          className="w-full h-full object-contain bg-black/40"
+                          className="object-contain bg-black/40"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
                         <span className="absolute bottom-3 left-3 text-[10px] font-black text-white uppercase tracking-wider">

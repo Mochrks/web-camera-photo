@@ -8,6 +8,7 @@ import { CameraType } from "@/components/camera/camera-types";
 import { useCamera } from "@/components/camera/camera-provider";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 
 interface CameraProps {
   onClosed: () => void;
@@ -189,8 +190,12 @@ const Camera: FC<CameraProps> = ({ onClosed, onCapturedImages, requiredPhotos })
           {/* Gallery Preview */}
           <div className="w-16 h-16 rounded-full border border-white/20 bg-neutral-900 overflow-hidden">
             {sessionImages.length > 0 ? (
-              <img
+              <Image
                 src={sessionImages[sessionImages.length - 1]}
+                alt="Captured Preview"
+                width={64}
+                height={64}
+                unoptimized
                 className="w-full h-full object-cover"
               />
             ) : (

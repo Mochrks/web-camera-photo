@@ -66,7 +66,7 @@ export default function FeatureSection() {
             </span>
           </motion.h2>
           <p className="text-neutral-500 text-lg leading-relaxed">
-            We don't just take pictures. We create a high-end digital experience powered by
+            We don&apos;t just take pictures. We create a high-end digital experience powered by
             cutting-edge technology and aesthetic precision.
           </p>
         </div>

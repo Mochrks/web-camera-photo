@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import type { ConfettiRef } from "@/components/ui/confetti";
 import Confetti from "@/components/ui/confetti";
 import { Download, Play, Printer, Settings2, Sparkles } from "lucide-react";
+import Image from "next/image";
 import { AdvancedEditor } from "@/components/camera/advanced-editor";
 
 export default function PhotoBooth() {
@@ -100,11 +101,15 @@ export default function PhotoBooth() {
             <div className="w-full flex flex-col lg:flex-row gap-12 items-center lg:items-start justify-center">
               {/* Final Image Container */}
               <div className="relative group p-3 bg-white/5 backdrop-blur-3xl rounded-[2.5rem] border border-white/10 shadow-[0_0_100px_rgba(0,0,0,0.8)] max-w-2xl w-full">
-                <img
-                  src={finalImage}
-                  alt="Final Layout"
-                  className="w-full h-auto rounded-[2rem] shadow-2xl"
-                />
+                <div className="relative w-full aspect-[4/5] sm:aspect-[3/4]">
+                  <Image
+                    src={finalImage}
+                    alt="Final Layout"
+                    fill
+                    unoptimized
+                    className="w-full h-auto rounded-[2rem] shadow-2xl object-contain"
+                  />
+                </div>
                 <div className="absolute -top-4 -right-4 bg-indigo-600 text-white p-3 rounded-2xl shadow-xl transform rotate-12">
                   <Sparkles className="w-5 h-5 fill-current" />
                 </div>
