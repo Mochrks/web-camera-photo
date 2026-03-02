@@ -180,6 +180,86 @@ const LayoutSelector: React.FC<LayoutSelectorProps> = ({ onSelect }) => {
       icon: ImageIcon,
       desc: "High-end fashion cover layout",
     },
+    {
+      id: 21,
+      name: "Retro Film",
+      count: 3,
+      tag: "Vintage",
+      icon: Film,
+      desc: "Analog film strip aesthetic",
+    },
+    {
+      id: 22,
+      name: "Neon Glow",
+      count: 4,
+      tag: "Dark",
+      icon: Zap,
+      desc: "Vibrant neon borders on dark background",
+    },
+    {
+      id: 23,
+      name: "Floral Garden",
+      count: 3,
+      tag: "Nature",
+      icon: Sparkles,
+      desc: "Spring flowers and green leaves",
+    },
+    {
+      id: 24,
+      name: "Polaroid Classic",
+      count: 3,
+      tag: "Classic",
+      icon: Camera,
+      desc: "Timeless polaroid with text space",
+    },
+    {
+      id: 25,
+      name: "Glitch Art",
+      count: 4,
+      tag: "Cyber",
+      icon: Zap,
+      desc: "Digital distortion and color shift",
+    },
+    {
+      id: 26,
+      name: "Monochrome",
+      count: 3,
+      tag: "B&W",
+      icon: ImageIcon,
+      desc: "Pure black and white elegance",
+    },
+    {
+      id: 27,
+      name: "Comic Book",
+      count: 4,
+      tag: "Pop",
+      icon: Star,
+      desc: "Halftone dots and comic panels",
+    },
+    {
+      id: 28,
+      name: "Watercolor",
+      count: 3,
+      tag: "Art",
+      icon: LayoutIcon,
+      desc: "Soft painted edges and textures",
+    },
+    {
+      id: 29,
+      name: "VHS Tape",
+      count: 3,
+      tag: "Retro",
+      icon: Film,
+      desc: "90s camcorder aesthetic with noise",
+    },
+    {
+      id: 30,
+      name: "Cyberpunk",
+      count: 4,
+      tag: "Sci-Fi",
+      icon: Zap,
+      desc: "High-tech grid and neon pink/blue",
+    },
   ];
 
   const LayoutPreview = ({ id, count }: { id: number; count: number }) => {
@@ -257,6 +337,48 @@ const LayoutSelector: React.FC<LayoutSelectorProps> = ({ onSelect }) => {
               <div className="flex-1 bg-black/5 rounded-sm border border-black/5" />
             </div>
           );
+        case 21: // Retro Film
+          return (
+            <div className="flex flex-col gap-2 w-full h-full p-2 bg-[#1a1a1a] border-x-8 border-black border-dashed">
+              {[...Array(count)].map((_, i) => (
+                <div key={i} className="flex-1 bg-white/80 rounded-sm" />
+              ))}
+            </div>
+          );
+        case 24: // Polaroid Classic
+          return (
+            <div className="flex flex-col gap-2 w-full h-full p-4 bg-white/90 pb-8 shadow-sm">
+              {[...Array(count)].map((_, i) => (
+                <div key={i} className="flex-1 bg-black/80 rounded-sm" />
+              ))}
+            </div>
+          );
+        case 27: // Comic Book
+          return (
+            <div className="grid grid-cols-2 gap-2 w-full h-full p-3 bg-yellow-400 border-4 border-black">
+              {[...Array(count)].map((_, i) => (
+                <div
+                  key={i}
+                  className={cn(
+                    "bg-white border-2 border-black",
+                    i === 0 ? "col-span-2" : "col-span-1"
+                  )}
+                />
+              ))}
+            </div>
+          );
+        case 30: // Cyberpunk
+          return (
+            <div className="flex flex-col gap-2 w-full h-full p-4 bg-black/90 border border-pink-500/50 relative overflow-hidden">
+              <div className="absolute inset-0 bg-[linear-gradient(transparent_50%,rgba(0,0,0,0.5)_50%)] bg-[length:100%_4px]" />
+              {[...Array(count)].map((_, i) => (
+                <div
+                  key={i}
+                  className="flex-1 bg-cyan-500/20 border border-cyan-400/50 rounded-sm z-10"
+                />
+              ))}
+            </div>
+          );
         default:
           return (
             <div className="flex gap-1.5 w-full h-full p-4">
@@ -293,7 +415,7 @@ const LayoutSelector: React.FC<LayoutSelectorProps> = ({ onSelect }) => {
           SELECT <span className="text-indigo-500">STYLE</span>
         </h1>
         <p className="text-neutral-500 text-sm font-medium tracking-tight">
-          Choose from 20+ trendy studio layouts. Each one is designed for the perfect social media
+          Choose from 30+ trendy studio layouts. Each one is designed for the perfect social media
           post.
         </p>
       </div>
