@@ -16,7 +16,7 @@ A **web-based photobooth application** built with **Next.js**, allowing users to
 
 ## Features
 
-* Capture photos directly from your webcam.
+* Capture photos directly from your webcams.
 * Choose from three customizable photo layouts.
 * Modern and responsive design built with **Tailwind CSS** and **Shadcn UI**.
 * Fast and efficient server-side rendering with **Next.js**.
@@ -28,7 +28,7 @@ A **web-based photobooth application** built with **Next.js**, allowing users to
 * **Tailwind CSS** for styling and responsive design
 * **Shadcn UI** for modern UI components
 
-## Setup & Installation
+## Setup & Installations
 
 ### Front-end (Next.js)
 
